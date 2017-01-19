@@ -1,15 +1,15 @@
 export function replace_lt_gt(text) {
-    return text.replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+    return text.replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 }
 
 export function replace_amp(text) {
-    return text.replace(/&/g, '&amp;');
+    return text.replace(/&/g, "&amp;");
 }
 
 export function replace_lf(text) {
     // We are presumably already stripping out CRs before this
-    return text.replace(/\n/g, '<br>');
+    return text.replace(/\n/g, "<br>");
 }
 
 export function raw_to_html(text) {
@@ -19,15 +19,14 @@ export function raw_to_html(text) {
 }
 
 export function strip_color_tags(text) {
-    var rtn='';
-    for (var i=0; i<text.length; i++) {
-        if (text[i] == '{')
-        {
-            if (i == text.length-1) {
+    let rtn = "";
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === "{") {
+            if (i === text.length - 1) {
                 break;
             }
-            else if (text[i+1] == '{') {
-                rtn += '{';
+            else if (text[i + 1] === "{") {
+                rtn += "{";
                 i++;
             }
             else {
@@ -40,9 +39,4 @@ export function strip_color_tags(text) {
     }
 
     return rtn;
-}
-
-
-export function callback(func, context) {
-    return 
 }
