@@ -1,9 +1,9 @@
-import {Client} from './client';
-import {Message} from './message';
-import {Socket} from './socket';
-import {AliasEditor} from './aliasEditor';
-import {TriggerEditor} from './triggerEditor';
-import {JsScriptWin} from './jsScriptWin';
+import {Client} from "./client";
+import {Message} from "./message";
+import {Socket} from "./socket";
+import {AliasEditor} from "./aliasEditor";
+import {TriggerEditor} from "./triggerEditor";
+import {JsScriptWin} from "./jsScriptWin";
 
 declare let $;
 
@@ -25,8 +25,8 @@ export class MenuBar {
 
         this.make_click_funcs();
 
-        this.pMessage.sub('prepare_reload_layout', this.prepare_reload_layout, this);
-        this.pMessage.sub('load_layout', this.load_layout, this);
+        this.pMessage.sub("prepare_reload_layout", this.prepare_reload_layout, this);
+        this.pMessage.sub("load_layout", this.load_layout, this);
     }
 
     private prepare_reload_layout() {
@@ -34,57 +34,57 @@ export class MenuBar {
     }
 
     private load_layout() {
-        $('#menu_bar').jqxMenu({ width: '100%', height: '4%'});
-        $('#menu_bar').on('itemclick', this.handle_click);
+        $("#menu_bar").jqxMenu({ width: "100%", height: "4%"});
+        $("#menu_bar").on("itemclick", this.handle_click);
 
         let o = this;
-        $('#chk_enable_trig').change(function() {
-            o.pMessage.pub('set_triggers_enabled', this.checked);
+        $("#chk_enable_trig").change(function() {
+            o.pMessage.pub("set_triggers_enabled", this.checked);
         });
 
-        $('#chk_enable_alias').change(function() {
-            o.pMessage.pub('set_aliases_enabled', this.checked);
+        $("#chk_enable_alias").change(function() {
+            o.pMessage.pub("set_aliases_enabled", this.checked);
         });
     };
 
     private click_funcs = {};
     private make_click_funcs() {
-        this.click_funcs['Reload Layout'] = () => {
+        this.click_funcs["Reload Layout"] = () => {
             this.pClient.reload_layout();
         };
 
-        this.click_funcs['Connect'] = () => {
+        this.click_funcs["Connect"] = () => {
             this.pSocket.open_telnet();
         };
 
-        this.click_funcs['Disconnect'] = () => {
+        this.click_funcs["Disconnect"] = () => {
             this.pSocket.close_telnet();
         };
 
-        this.click_funcs['Aliases'] = () => {
+        this.click_funcs["Aliases"] = () => {
             this.pAliasEditor.show();
         };
 
-        this.click_funcs['Triggers'] = () => {
+        this.click_funcs["Triggers"] = () => {
             this.pTriggerEditor.show();
         };
 
-        this.click_funcs['Green'] = () => {
-            this.pMessage.pub('change_default_color', 'green');
+        this.click_funcs["Green"] = () => {
+            this.pMessage.pub("change_default_color", "green");
         };
 
-        this.click_funcs['White'] = () => {
-            this.pMessage.pub('change_default_color', 'white');
+        this.click_funcs["White"] = () => {
+            this.pMessage.pub("change_default_color", "white");
         };
 
-        this.click_funcs['Script'] = () => {
+        this.click_funcs["Script"] = () => {
             this.pJsScriptWin.show();
         };
     }
 
     private handle_click(event) {
-        var item = event.args;
-        var text = $(item).text();
+        let item = event.args;
+        let text = $(item).text();
         if (text in this.click_funcs) {
             this.click_funcs[text]();
         }
