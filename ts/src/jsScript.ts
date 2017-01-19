@@ -1,36 +1,39 @@
-var JsScript = new function() {
-    var _script_this = {}; /* this used for all scripts */
+import {Message} from './message';
 
-    return function(text) {
+function makeScript(text, pMessage) {
+    let script_func;
+    /* Scripting API section */
+    let send = function(cmd) {
+        pMessage.pub('script_send_command', {data: cmd});
+    };
 
-        /* Scripting API section */
-        var send = function(cmd) {
-            Message.pub('script_send_command', {data: cmd});
-        };
+    let print = function(message) {
+        pMessage.pub('script_print', {data: message});
+    };
+    /* end Scripting API section */
 
-        var print = function(message) {
-            Message.pub('script_print', {data: message});
-        };
-        /* end Scripting API section */
-
-        try {
-            eval('var script_func = function(match) {"use strict";' + text + '}');
-        }
-        catch (err) {
-            Message.pub('script_eval_error', {data: err});
-            return null;
-        }
-
-        this.RunScript = function(match) {
-            try {
-                script_func.call(_script_this, match);
-            }
-            catch (err) {
-                Message.pub('script_exec_error', {data: err});
-                return;
-            }
-        };
-
-        return this;
+    try {
+        eval('script_func = function(match) {"use strict";' + text + '}');
     }
-}();
+    catch (err) {
+        pMessage.pub('script_eval_error', {data: err});
+        return null;
+    }
+
+    script_func.bind(this);
+
+    return script_func;
+}
+
+export class JsScript {
+    private pMessage: Message;
+    private _script_this = {}; /* this used for all scripts */
+
+    constructor(pMessage: Message) {
+        this.pMessage = pMessage;
+    }
+
+    public makeScript(text) {
+        return makeScript.call(this._script_this, text, this.pMessage);
+    }
+}

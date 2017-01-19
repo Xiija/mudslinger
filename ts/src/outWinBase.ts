@@ -1,169 +1,162 @@
-function OutWinBase() {
-    var o = this;
+import * as Util from './util';
 
-    var line_count=0;
-    var max_lines = 5000;
-    o.set_max_lines = function(count) {
-        max_lines = count;
+declare let $;
+
+export class OutWinBase {
+    private line_count: number = 0;
+    private max_lines: number = 5000;
+    public set_max_lines(count: number) {
+        this.max_lines = count;
     }
 
-    o.fg_color = null;
-    o.bg_color = null;
+    private fg_color = null;
+    private bg_color = null;
 
-    o.set_fg_color = function(color) {
-        o.fg_color = color;
-    };
+    public set_fg_color(color) {
+        this.fg_color = color;
+    }
 
-    o.set_bg_color = function(color) {
-        o.bg_color = color;
+    public set_bg_color(color) {
+        this.bg_color = color;
     };
 
     // handling nested elements, always output to last one
-    o.target_elems = null;
-    o.target = null;
-    o.root_elem = null;
+    private target_elems = null;
+    protected target = null;
+    private root_elem = null;
 
-    var scroll_lock = false; // true when we should not scroll to bottom
-    var handle_scroll = function(e) {
-        var scrollHeight = o.root_elem.prop('scrollHeight');
-        var scrollTop = o.root_elem.scrollTop();
-        var outerHeight = o.root_elem.outerHeight();
+    private scroll_lock = false; // true when we should not scroll to bottom
+    private handle_scroll(e) {
+        var scrollHeight = this.root_elem.prop('scrollHeight');
+        var scrollTop = this.root_elem.scrollTop();
+        var outerHeight = this.root_elem.outerHeight();
         var is_at_bottom = outerHeight + scrollTop >= scrollHeight;
 
-//        console.log("Bottom:" + is_at_bottom);
-//        console.log(scrollHeight);
-//        console.log(scrollTop);
-//        console.log(outerHeight);
-
-        scroll_lock = !is_at_bottom;
-    };
+        this.scroll_lock = !is_at_bottom;
+    }
 
     // must set root elem before actually using it
-    o.set_root_elem = function(elem) {
+    protected set_root_elem(elem) {
         // this may be called upon layout reload
-        o.root_elem = elem;
-        o.target_elems = [elem];
-        o.target =  elem;
+        this.root_elem = elem;
+        this.target_elems = [elem];
+        this.target =  elem;
 
         // direct children of the root will be line containers, let's push the first one.
-        o.push_elem($('<span>').appendTo(elem));
+        this.push_elem($('<span>').appendTo(elem));
 
-        o.root_elem.bind('scroll', handle_scroll);
+        this.root_elem.bind('scroll', (e) => {this.handle_scroll(e);});
     };
 
     // elem is the actual jquery element
-    o.push_elem = function(elem) {
+    public push_elem(elem) {
 //        console.log(o);
 //        console.log("elem pushed");
 //        console.log(elem);
-        o.write_buffer();
+        this.write_buffer();
 
-        o.target.append(elem);
-        o.target_elems.push(elem);
-        o.target = elem;
-    };
+        this.target.append(elem);
+        this.target_elems.push(elem);
+        this.target = elem;
+    }
 
-    o.pop_elem = function() {
-        o.write_buffer();
+    public pop_elem() {
+        this.write_buffer();
 
-        var popped = o.target_elems.pop();
+        var popped = this.target_elems.pop();
 //        console.log(o);
 //        console.log("elem popped");
 //        console.log(popped);
-        o.target = o.target_elems[o.target_elems.length-1];
+        this.target = this.target_elems[this.target_elems.length-1];
         return popped;
-    };
+    }
 
-    o.handle_line = function(line) {
+    protected handle_line(line) {
         // default to nothing, main output window will send it to trigger manager
-    };
+    }
 
-    var append_buffer = '';
-    var line_text = ''; // track full text of the line with no escape sequences or tags
-    o.add_text = function(txt) {
-//        console.log("add text");
-//        console.log(txt);
-//        console.log(o.target);
-        line_text += txt;
+    private append_buffer = '';
+    private line_text = ''; // track full text of the line with no escape sequences or tags
+    public add_text(txt) {
+        this.line_text += txt;
         var html = Util.raw_to_html(txt);
 //        var span = $(document.createElement('span'));
         var span_text = '<span'
         var style = ''
-        if (o.fg_color || o.bg_color) {
+        if (this.fg_color || this.bg_color) {
             style = ' style="'
-            if (o.fg_color) {
-                style += 'color:' + o.fg_color + ';';
+            if (this.fg_color) {
+                style += 'color:' + this.fg_color + ';';
             }
-            if (o.bg_color) {
-                style += 'background-color:' + o.bg_color + ';';
+            if (this.bg_color) {
+                style += 'background-color:' + this.bg_color + ';';
             }
             style += '"';
         }
         span_text += style + '>';
         span_text += html;
         span_text += '</span>';
-        append_buffer += span_text;
+        this.append_buffer += span_text;
 
         if (txt.endsWith('\n')) {
-            o.target.append(append_buffer);
-            append_buffer = '';
-            o.new_line();
+            this.target.append(this.append_buffer);
+            this.append_buffer = '';
+            this.new_line();
         }
     };
 
-    o.new_line = function() {
-        o.pop_elem(); // pop the old line
-        o.push_elem($('<span>').appendTo(o.target));
+    private new_line() {
+        this.pop_elem(); // pop the old line
+        this.push_elem($('<span>').appendTo(this.target));
 
-        o.handle_line(line_text);
-        line_text = '';
+        this.handle_line(this.line_text);
+        this.line_text = '';
 
-        line_count += 1;
-        if (line_count > max_lines) {
-            o.root_elem.children(":lt(" +
-                (max_lines/2) +
+        this.line_count += 1;
+        if (this.line_count > this.max_lines) {
+            this.root_elem.children(":lt(" +
+                (this.max_lines/2) +
                 ")"
             ).remove();
-            line_count = (max_lines/2);
+            this.line_count = (this.max_lines/2);
         }
     }
 
-    o.write_buffer = function() {
-        o.target.append(append_buffer);
-        append_buffer = '';
+    private write_buffer() {
+        this.target.append(this.append_buffer);
+        this.append_buffer = '';
     };
 
-    o.output_done = function() {
-        o.write_buffer();
-        o.scroll_bottom();
+    public output_done() {
+        this.write_buffer();
+        this.scroll_bottom();
     };
 
-    var scroll_requested = false;
-    var _scroll_bottom = function() {
+    private scroll_requested = false;
+    private _scroll_bottom() {
         console.time("_scroll_bottom");
-        var elem = o.root_elem;
+        var elem = this.root_elem;
         elem.scrollTop(elem.prop('scrollHeight'));
-        scroll_lock = false;
-        scroll_requested = false;
+        this.scroll_lock = false;
+        this.scroll_requested = false;
         console.timeEnd("_scroll_bottom");
     };
 
-    o.scroll_bottom = function(force) {
-        if (scroll_lock && !(force == true)) {
+    protected scroll_bottom(force: boolean = false) {
+        if (this.scroll_lock && !(force == true)) {
             return;
         }
-        if (scroll_requested) {
+        if (this.scroll_requested) {
             return;
         }
-        requestAnimationFrame(_scroll_bottom);
-        scroll_requested = true;
+        var o = this;
+        requestAnimationFrame(() => o._scroll_bottom.call(o));
+        this.scroll_requested = true;
 //        //if (true) {return;}
 //        var elem = o.root_elem;
 //        //var scrollHeight = elem.prop('scrollHeight');
 //        console.log("scroll calt");
 ////        var scrollHeight = elem[0].scrollHeight;
 //        elem.scrollTop(line_count * 20);
-    };
-
-    return o;
-};
+    }
+}

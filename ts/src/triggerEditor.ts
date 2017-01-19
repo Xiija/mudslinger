@@ -1,14 +1,25 @@
-var TriggerEditor = new (function() {
-    var o = new TrigAlEditBase();
+import {TrigAlEditBase} from './trigAlEditBase';
+import {TriggerManager} from './triggerManager';
 
-    o.default_value =
+declare let $;
+
+export class TriggerEditor extends TrigAlEditBase {
+    private pTriggerManager: TriggerManager;
+
+    constructor(pTriggerManager: TriggerManager) {
+        super();
+        
+        this.pTriggerManager = pTriggerManager;
+    }
+
+    protected default_value =
          "Put the trigger value here.\n"
         +"This can be 1 or more commands, including match parameters (e.g. $1) for regex triggers.\n\n"
         +"For regex triggers, use ${groupnum} to represent the matches from your regex pattern.\n"
         +"Example: Trigger pattern '(\\w+) has arrived.', trigger value 'say Hi $1', "
         +"then if 'Vodur has arrived' comes through, 'say hi Vodur' will be sent.";
 
-    o.default_script =
+    protected default_script =
          "/* Put the script here.\n"
         +"This is javascript code that will run when the trigger fires.\n"
         +"You are prevented from creating global variables.\n"
@@ -21,23 +32,25 @@ var TriggerEditor = new (function() {
         +"For regex triggers, 'match' will be the javascript match array, with \n"
         +"indices according to match groups.\n";
 
-    o.get_elements = function() {
-        o.win = $('#win_trig_edit');
-        o.list_box = $('#trig_list_box');
-        o.pattern = $('#trig_pattern');
-        o.regex_checkbox = $('#trig_regex_checkbox');
-        o.script_checkbox = $('#trig_script_checkbox');
-        o.text_area = $('#trig_text_area');
-        o.script_area = $('#trig_script_area');
-        o.new_button = $('#trig_new_button');
-        o.delete_button = $('#trig_delete_button');
-        o.save_button = $('#trig_save_button');
-        o.cancel_button = $('#trig_cancel_button');
-        o.main_split = $('#trig_main_split');
+    protected default_pattern = null;
+
+    protected get_elements() {
+        this.win = $('#win_trig_edit');
+        this.list_box = $('#trig_list_box');
+        this.pattern = $('#trig_pattern');
+        this.regex_checkbox = $('#trig_regex_checkbox');
+        this.script_checkbox = $('#trig_script_checkbox');
+        this.text_area = $('#trig_text_area');
+        this.script_area = $('#trig_script_area');
+        this.new_button = $('#trig_new_button');
+        this.delete_button = $('#trig_delete_button');
+        this.save_button = $('#trig_save_button');
+        this.cancel_button = $('#trig_cancel_button');
+        this.main_split = $('#trig_main_split');
     };
 
-    o.get_list = function() {
-        var triggers = TriggerManager.triggers;
+    protected get_list() {
+        var triggers = this.pTriggerManager.triggers;
         var lst = [];
         for (var i=0; i < triggers.length; i++) {
             lst.push(triggers[i].pattern);
@@ -46,8 +59,8 @@ var TriggerEditor = new (function() {
         return lst;
     };
 
-    o.get_item = function(ind) {
-        var triggers = TriggerManager.triggers;
+    protected get_item(ind) {
+        var triggers = this.pTriggerManager.triggers;
         if (ind < 0 || ind >= triggers.length) {
             return null;
         } else {
@@ -55,7 +68,7 @@ var TriggerEditor = new (function() {
         }
     };
 
-    o.save_item = function(ind, pattern, value, regex, is_script) {
+    protected save_item(ind, pattern, value, regex, is_script) {
         var trig = {
             pattern: pattern,
             value: value,
@@ -64,18 +77,16 @@ var TriggerEditor = new (function() {
         }
         if (ind < 0) {
             // New trigger
-            TriggerManager.triggers.push(trig);
+            this.pTriggerManager.triggers.push(trig);
         } else {
             // Update trigger
-            TriggerManager.triggers[ind] = trig;
+            this.pTriggerManager.triggers[ind] = trig;
         }
-        TriggerManager.save_triggers();
+        this.pTriggerManager.save_triggers();
     };
 
-    o.delete_item = function(ind) {
-        TriggerManager.triggers.splice(ind, 1);
-        TriggerManager.save_triggers();
+    protected delete_item(ind) {
+        this.pTriggerManager.triggers.splice(ind, 1);
+        this.pTriggerManager.save_triggers();
     };
-
-    return o;
-})();
+}

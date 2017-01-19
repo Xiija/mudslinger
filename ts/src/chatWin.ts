@@ -1,22 +1,31 @@
-var ChatWin = new (function() {
-    var o = new OutWinBase();
+import {Message} from './message';
+import {OutWinBase} from './outWinBase';
 
-    var html;
+declare let $;
 
-    o.prepare_reload_layout = function () {
-        html = $('#win_chat').html();
+export class ChatWin extends OutWinBase {
+    private pMessage: Message;
+    
+    private html;
+
+    constructor(pMessage: Message) {
+        super();
+        this.pMessage = pMessage;
+
+        this.pMessage.sub('prepare_reload_layout', this.prepare_reload_layout, this);
+        this.pMessage.sub('load_layout', this.load_layout, this);
+    }
+
+    private prepare_reload_layout() {
+        this.html = $('#win_chat').html();
     };
 
-    o.load_layout = function () {
-        o.set_root_elem($('#win_chat'));
-        if (html) {
-            $('#win_chat').html(html);
-            html = null;
+    private load_layout() {
+        this.set_root_elem($('#win_chat'));
+        if (this.html) {
+            $('#win_chat').html(this.html);
+            this.html = null;
         }
-    };
+    }
+}
 
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', ChatWin.prepare_reload_layout);
-Message.sub('load_layout', ChatWin.load_layout);

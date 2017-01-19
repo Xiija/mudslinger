@@ -1,26 +1,35 @@
-var JsScriptWin = new (function() {
-    var o = this;
+import {JsScript} from './jsScript';
 
-    o.win = null;
-    o.code_mirror = null;
-    o.run_button = null;
+declare let $;
+declare let CodeMirror;
 
-    var handle_run_button_click = function() {
-        var code_text = o.code_mirror.getValue();
-        var script = JsScript(code_text);
+export class JsScriptWin {
+    private pJsScript: JsScript;
+
+    private win = null;
+    private code_mirror = null;
+    private run_button = null;
+
+    constructor(pJsScript: JsScript) {
+        this.pJsScript = pJsScript;
+    }
+
+    private handle_run_button_click() {
+        var code_text = this.code_mirror.getValue();
+        var script = this.pJsScript.makeScript(code_text);
         if (script) {script.RunScript()};
     };
 
-    o.get_elements = function() {
-        o.win = $('#win_js_script');
-        o.run_button = $('#win_js_script_run_button')
+    private get_elements() {
+        this.win = $('#win_js_script');
+        this.run_button = $('#win_js_script_run_button')
     };
 
-    o.create_window = function() {
-        o.get_elements();
+    private create_window() {
+        this.get_elements();
 
-        o.win.jqxWindow({width: 600, height: 400});
-        o.code_mirror = CodeMirror.fromTextArea(
+        this.win.jqxWindow({width: 600, height: 400});
+        this.code_mirror = CodeMirror.fromTextArea(
             document.getElementById("win_js_script_code"),
             {
                 mode: 'javascript',
@@ -31,17 +40,15 @@ var JsScriptWin = new (function() {
             }
         );
 
-        o.run_button.click(handle_run_button_click);
+        this.run_button.click(this.handle_run_button_click);
 
     };
 
-    o.show = function() {
-        if (!o.win) {
-            o.create_window();
+    public show() {
+        if (!this.win) {
+            this.create_window();
         }
 
-        o.win.jqxWindow('open');
+        this.win.jqxWindow('open');
     };
-
-    return o;
-})();
+}

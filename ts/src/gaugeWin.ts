@@ -1,30 +1,44 @@
-var GaugeWin = new (function() {
-    var GAUGE_HEIGHT = '18%';
-    var GAUGE_WIDTH = '100%';
+import {Message, MsgDef} from './message';
+import * as Util from './util';
 
-    var o = self;
+declare let $;
 
-    var msdp_vals = {};
-    var update_funcs = {};
+const GAUGE_HEIGHT = '18%';
+const GAUGE_WIDTH = '100%';
 
-    var render_gauge_text = function(curr, max, tag) {
+export class GaugeWin {
+    private pMessage: Message;
+    private msdp_vals = {};
+    private update_funcs = {};
+
+    constructor(pMessage: Message) {
+        this.pMessage = pMessage;
+
+        this.create_update_funcs();
+
+        this.pMessage.sub('msdp_var', this.handle_msdp_var, this);
+        this.pMessage.sub('prepare_reload_layout', this.prepare_reload_layout, this);
+        this.pMessage.sub('load_layout', this.load_layout, this);
+    }
+
+    private render_gauge_text(curr, max, tag) {
         var rtn = "<pre class='gauge_text'>"+("     " + curr).slice(-5) + " / " + ("     " + max).slice(-5) + " " + tag+"</pre>";
         return rtn;
-    };
+    }
 
-    o.prepare_reload_layout = function() {
+    private prepare_reload_layout() {
         // nada
     };
 
-    o.load_layout = function() {
+    private load_layout() {
         $('#hp_bar').jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                return render_gauge_text( msdp_vals.HEALTH || 0, msdp_vals.HEALTH_MAX || 0, "hp ");
+            renderText: (text) => {
+                return this.render_gauge_text( this.msdp_vals['HEALTH'] || 0, this.msdp_vals['HEALTH_MAX'] || 0, "hp ");
             }
         });
 
@@ -37,9 +51,9 @@ var GaugeWin = new (function() {
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
+            renderText: (text) => {
                 //return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
-                return render_gauge_text( msdp_vals.MANA || 0, msdp_vals.MANA_MAX || 0, "mn ");
+                return this.render_gauge_text( this.msdp_vals['MANA'] || 0, this.msdp_vals['MANA_MAX'] || 0, "mn ");
             }
         });
         $('#mana_bar .jqx-progressbar-value').css(
@@ -51,9 +65,9 @@ var GaugeWin = new (function() {
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
+            renderText: (text) => {
                 //return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
-                return render_gauge_text( msdp_vals.MOVEMENT || 0, msdp_vals.MOVEMENT_MAX || 0, "mv ");
+                return this.render_gauge_text( this.msdp_vals['MOVEMENT'] || 0, this.msdp_vals['MOVEMENT_MAX'] || 0, "mv ");
             }
         });
         $('#move_bar .jqx-progressbar-value').css(
@@ -65,8 +79,8 @@ var GaugeWin = new (function() {
             value: 0,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                return Util.strip_color_tags(msdp_vals.OPPONENT_NAME || '');
+            renderText: (text) => {
+                return Util.strip_color_tags(this.msdp_vals['OPPONENT_NAME'] || '');
             }
         });
         $('#enemy_bar .jqx-progressbar-value').css(
@@ -78,79 +92,67 @@ var GaugeWin = new (function() {
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                var tnl=msdp_vals.EXPERIENCE_TNL || 0;
-                var max=msdp_vals.EXPERIENCE_MAX || 0;
-                return render_gauge_text( max-tnl, max, "etl");
+            renderText: (text) => {
+                var tnl = this.msdp_vals['EXPERIENCE_TNL'] || 0;
+                var max = this.msdp_vals['EXPERIENCE_MAX'] || 0;
+                return this.render_gauge_text( max-tnl, max, "etl");
             }
         });
         $('#tnl_bar .jqx-progressbar-value').css(
                 "background-color", "#04B404");
 
-        for (var k in update_funcs) {
-            update_funcs[k]();
+        for (var k in this.update_funcs) {
+            this.update_funcs[k]();
         }
-    };
-
-
-    update_funcs.HEALTH = function() {
-        var val = msdp_vals.HEALTH || 0;
-        var max = msdp_vals.HEALTH_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#hp_bar').jqxProgressBar({ value: 100*val/max });
-    };
-    update_funcs.HEALTH_MAX = update_funcs.HEALTH;
-
-    update_funcs.MANA = function() {
-        var val = msdp_vals.MANA || 0;
-        var max = msdp_vals.MANA_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#mana_bar').jqxProgressBar({ value: 100*val/max });
     }
-    update_funcs.MANA_MAX = update_funcs.MANA;
 
-    update_funcs.MOVEMENT = function() {
-        var val = msdp_vals.MOVEMENT || 0;
-        var max = msdp_vals.MOVEMENT_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#move_bar').jqxProgressBar({ value: 100*val/max });
-    }
-    update_funcs.MOVEMENT_MAX = update_funcs.MOVEMENT;
+    private create_update_funcs() {
+        this.update_funcs['HEALTH'] = () => {
+            var val = this.msdp_vals['HEALTH'] || 0;
+            var max = this.msdp_vals['HEALTH_MAX'] || 0;
+            if ( !max || max == 0) { return; }
+            $('#hp_bar').jqxProgressBar({ value: 100*val/max });
+        };
+        this.update_funcs['HEALTH_MAX'] = this.update_funcs['HEALTH'];
 
-    update_funcs.OPPONENT_HEALTH = function() {
-        var val = msdp_vals.OPPONENT_HEALTH || 0;
-        var max = msdp_vals.OPPONENT_HEALTH_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#enemy_bar').jqxProgressBar({ value: 100*val/max });
-    }
-    update_funcs.OPPONENT_HEALTH_MAX = update_funcs.OPPONENT_HEALTH;
-    update_funcs.OPPONENT_NAME = update_funcs.OPPONENT_HEALTH;
-
-    update_funcs.EXPERIENCE_TNL = function() {
-        var val = msdp_vals.EXPERIENCE_TNL || 0;
-        var max = msdp_vals.EXPERIENCE_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#tnl_bar').jqxProgressBar({ value: 100*(max - val)/max });
-    }
-    update_funcs.EXPERIENCE_MAX = update_funcs.EXPERIENCE_TNL;
-
-
-    o.handle_msdp_var = function(msg) {
-        if (msg.var in update_funcs) {
-            msdp_vals[msg.var] = msg.val;
-            update_funcs[msg.var]();
+        this.update_funcs['MANA'] = () => {
+            var val = this.msdp_vals['MANA'] || 0;
+            var max = this.msdp_vals['MANA_MAX'] || 0;
+            if ( !max || max == 0) { return; }
+            $('#mana_bar').jqxProgressBar({ value: 100*val/max });
         }
-    };
+        this.update_funcs['MANA_MAX'] = this.update_funcs['MANA'];
 
-    return o;
+        this.update_funcs['MOVEMENT'] = () => {
+            var val = this.msdp_vals['MOVEMENT'] || 0;
+            var max = this.msdp_vals['MOVEMENT_MAX'] || 0;
+            if ( !max || max == 0) { return; }
+            $('#move_bar').jqxProgressBar({ value: 100*val/max });
+        }
+        this.update_funcs['MOVEMENT_MAX'] = this.update_funcs['MOVEMENT'];
 
-})();
+        this.update_funcs['OPPONENT_HEALTH'] = () => {
+            var val = this.msdp_vals['OPPONENT_HEALTH'] || 0;
+            var max = this.msdp_vals['OPPONENT_HEALTH_MAX'] || 0;
+            if ( !max || max == 0) { return; }
+            $('#enemy_bar').jqxProgressBar({ value: 100*val/max });
+        }
+        this.update_funcs['OPPONENT_HEALTH_MAX'] = this.update_funcs['OPPONENT_HEALTH'];
+        this.update_funcs['OPPONENT_NAME'] = this.update_funcs['OPPONENT_HEALTH'];
 
-//$(document).ready(function() {
-//    GaugeWin.load_layout();
-//});
+        this.update_funcs['EXPERIENCE_TNL'] = () => {
+            var val = this.msdp_vals['EXPERIENCE_TNL'] || 0;
+            var max = this.msdp_vals['EXPERIENCE_MAX'] || 0;
+            if ( !max || max == 0) { return; }
+            $('#tnl_bar').jqxProgressBar({ value: 100*(max - val)/max });
+        }
+        this.update_funcs['EXPERIENCE_MAX'] = this.update_funcs['EXPERIENCE_TNL'];
+    }
 
-
-Message.sub('msdp_var', GaugeWin.handle_msdp_var);
-Message.sub('prepare_reload_layout', GaugeWin.prepare_reload_layout);
-Message.sub('load_layout', GaugeWin.load_layout);
+    private handle_msdp_var(data: MsgDef.msdp_var) {
+        if (data.varname in this.update_funcs) {
+            this.msdp_vals[data.varname] = data.value;
+            this.update_funcs[data.varname]();
+        }
+    }
+}

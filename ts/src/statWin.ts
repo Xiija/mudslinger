@@ -1,7 +1,19 @@
-var StatWin = new (function(){
-    var o = this;
+import {Message} from './message'
 
-    var msdp_vals = {
+declare let $;
+
+export class StatWin {
+    private pMessage: Message;
+
+    constructor(pMessage: Message) {
+        this.pMessage = pMessage;
+
+        this.pMessage.sub('prepare_reload_layout', this.prepare_reload_layout, this);
+        this.pMessage.sub('load_layout', this.load_layout, this);
+        this.pMessage.sub('msdp_var', this.handle_msdp_var, this);
+    }
+
+    private msdp_vals = {
         'STR': null, 'STR_PERM': null,
         'INT': null, 'INT_PERM': null,
         'CON': null, 'CON_PERM': null,
@@ -14,29 +26,29 @@ var StatWin = new (function(){
         'LUC': null, 'LUC_PERM': null
     };
 
-    var html;
+    private html;
 
-    o.prepare_reload_layout = function() {
-        html = $('#win_stat').html();
+    private prepare_reload_layout() {
+        this.html = $('#win_stat').html();
     };
 
-    o.load_layout = function() {
-        if (html) {
+    private load_layout() {
+        if (this.html) {
             // it's a reload
-            $('#win_stat').html(html);
-            html = null;
+            $('#win_stat').html(this.html);
+            this.html = null;
         }
     };
 
-    o.update_stat_win = function() {
+    private update_stat_win() {
         var output = '';
         output +=
         output += '<h2>STATS</h2>';
 
         var left = false;
 
-        function print_stat( label, val, perm) {
-            var color;
+        let print_stat = (label, val, perm) => {
+            let color;
             left = !left;
             if (left) {
                 color = "red";
@@ -47,8 +59,8 @@ var StatWin = new (function(){
             output += '<span style="color: '+color+';">';
 
             output += label + ": ";
-            output += ("   " + (msdp_vals[perm] || '???')).slice(-3);
-            output += "("+(("   " + (msdp_vals[val] || '???')).slice(-3))+")";
+            output += ("   " + (this.msdp_vals[perm] || '???')).slice(-3);
+            output += "("+(("   " + (this.msdp_vals[val] || '???')).slice(-3))+")";
 
             output += "</span>"
         }
@@ -85,19 +97,13 @@ var StatWin = new (function(){
         $('#win_stat').html("<pre>"+output+"</pre>");
     };
 
-    o.handle_msdp_var = function(msg) {
-        if (!msg.var in msdp_vals) {
+    private handle_msdp_var(msg) {
+        if (!(msg.var in this.msdp_vals)) {
             return;
         }
 
-        msdp_vals[msg.var] = msg.val;
+        this.msdp_vals[msg.var] = msg.val;
 
-        o.update_stat_win();
+        this.update_stat_win();
     };
-
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', StatWin.prepare_reload_layout);
-Message.sub('load_layout', StatWin.load_layout);
-Message.sub('msdp_var', StatWin.handle_msdp_var);
+}

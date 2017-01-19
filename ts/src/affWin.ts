@@ -1,47 +1,53 @@
-var AffWin = new (function(){
-    var o = this;
+import {Message, MsgDef} from './message';
 
-    var output;
+declare let $;
 
-    o.prepare_reload_layout = function() {
+export class AffWin {
+    private pMessage: Message;
+    private output: string = null;
+
+    constructor(pMessage: Message) {
+        this.pMessage = pMessage;
+        this.pMessage.sub('msdp_var', this.handle_msdp_var, this);
+        this.pMessage.sub('prepare_reload_layout' , this.prepare_reload_layout, this);
+        this.pMessage.sub('load_layout', this.load_layout, this);
+    }
+
+    private prepare_reload_layout() {
         // nada
-    };
+    }
 
-    o.load_layout = function() {
-        if (output) {
+    private load_layout() {
+        console.log(this);
+        if (this.output) {
             // it's a reload
-            $('#win_aff').html(output);
+            $('#win_aff').html(this.output);
         } else {
-            o.show_affects([]);
+            this.show_affects([]);
         }
-    };
+    }
 
-    o.show_affects = function(affects) {
-        output = "<h2>AFFECTS</h2>";
+    private show_affects(affects) {
+        this.output = "<h2>AFFECTS</h2>";
 
         for (var key in affects) {
-            output += ("   "+affects[key]).slice(-3) + ' : ' + key + "<br>";
+            this.output += ("   "+affects[key]).slice(-3) + ' : ' + key + "<br>";
         }
 
-        $('#win_aff').html(output);
+        $('#win_aff').html(this.output);
     };
 
-    o.handle_msdp_var = function(msg) {
-        if (msg.var != "AFFECTS") {
+    private handle_msdp_var(data: MsgDef.msdp_var) {
+        if (data.varname != "AFFECTS") {
             return;
         }
         var val;
-        if (msg.val == '') {
+        if (data.value == '') {
             val = [];
         } else {
-            val = msg.val;
+            val = data.value;
         }
-        o.show_affects(val);
+        this.show_affects(val);
     };
 
-    return o;
-})();
-
-Message.sub('msdp_var', AffWin.handle_msdp_var);
-Message.sub('prepare_reload_layout', AffWin.prepare_reload_layout);
-Message.sub('load_layout', AffWin.load_layout);
+}

@@ -1,71 +1,92 @@
-var MenuBar = new (function() {
-    var o = this;
+import {Client} from './client';
+import {Message} from './message';
+import {Socket} from './socket';
+import {AliasEditor} from './aliasEditor';
+import {TriggerEditor} from './triggerEditor';
+import {JsScriptWin} from './jsScriptWin';
 
-    o.prepare_reload_layout = function() {
+declare let $;
+
+export class MenuBar {
+    private pMessage: Message;
+    private pClient: Client;
+    private pSocket: Socket;
+    private pAliasEditor: AliasEditor;
+    private pTriggerEditor: TriggerEditor;
+    private pJsScriptWin: JsScriptWin;
+
+    constructor(pMessage: Message, pClient: Client, pSocket: Socket, pAliasEditor: AliasEditor, pTriggerEditor: TriggerEditor, pJsScriptWin: JsScriptWin) {
+        this.pMessage = pMessage;
+        this.pClient = pClient;
+        this.pSocket = pSocket;
+        this.pAliasEditor = pAliasEditor;
+        this.pTriggerEditor = pTriggerEditor;
+        this.pJsScriptWin = pJsScriptWin;
+
+        this.make_click_funcs();
+
+        this.pMessage.sub('prepare_reload_layout', this.prepare_reload_layout, this);
+        this.pMessage.sub('load_layout', this.load_layout, this);
+    }
+
+    private prepare_reload_layout() {
         // nada
-    };
+    }
 
-    o.load_layout = function() {
+    private load_layout() {
         $('#menu_bar').jqxMenu({ width: '100%', height: '4%'});
-        $('#menu_bar').on('itemclick', o.handle_click);
+        $('#menu_bar').on('itemclick', this.handle_click);
 
+        let o = this;
         $('#chk_enable_trig').change(function() {
-            Message.pub('set_triggers_enabled', this.checked);
+            o.pMessage.pub('set_triggers_enabled', this.checked);
         });
 
         $('#chk_enable_alias').change(function() {
-            Message.pub('set_aliases_enabled', this.checked);
+            o.pMessage.pub('set_aliases_enabled', this.checked);
         });
     };
 
-    var click_funcs = {};
-    click_funcs['Reload Layout'] = function() {
-        console.log("OMG reload");
-        Client.reload_layout();
-    };
+    private click_funcs = {};
+    private make_click_funcs() {
+        this.click_funcs['Reload Layout'] = () => {
+            this.pClient.reload_layout();
+        };
 
-    click_funcs['Connect'] = function() {
-        Socket.open_telnet();
-    };
+        this.click_funcs['Connect'] = () => {
+            this.pSocket.open_telnet();
+        };
 
-    click_funcs['Disconnect'] = function() {
-        Socket.close_telnet();
-    };
+        this.click_funcs['Disconnect'] = () => {
+            this.pSocket.close_telnet();
+        };
 
-    click_funcs['Aliases'] = function() {
-        AliasEditor.show();
-    };
+        this.click_funcs['Aliases'] = () => {
+            this.pAliasEditor.show();
+        };
 
-    click_funcs['Triggers'] = function() {
-        TriggerEditor.show();
-    };
+        this.click_funcs['Triggers'] = () => {
+            this.pTriggerEditor.show();
+        };
 
-    click_funcs['Test socket response'] = function() {
-        Socket.test_socket_response();
-    };
+        this.click_funcs['Green'] = () => {
+            this.pMessage.pub('change_default_color', 'green');
+        };
 
-    click_funcs['Green'] = function() {
-        Message.pub('change_default_color', 'green');
-    };
+        this.click_funcs['White'] = () => {
+            this.pMessage.pub('change_default_color', 'white');
+        };
 
-    click_funcs['White'] = function() {
-        Message.pub('change_default_color', 'white');
-    };
+        this.click_funcs['Script'] = () => {
+            this.pJsScriptWin.show();
+        };
+    }
 
-    click_funcs['Script'] = function() {
-        JsScriptWin.show();
-    };
-
-    o.handle_click = function(event) {
+    private handle_click(event) {
         var item = event.args;
         var text = $(item).text();
-        if (text in click_funcs) {
-            click_funcs[text]();
+        if (text in this.click_funcs) {
+            this.click_funcs[text]();
         }
     };
-
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', MenuBar.prepare_reload_layout);
-Message.sub('load_layout', MenuBar.load_layout);
+}

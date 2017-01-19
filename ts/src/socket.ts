@@ -1,82 +1,105 @@
-var Socket = new (function() {
-    var o = this;
+import {Message, MsgDef} from "./message";
+import {Mxp} from './mxp';
+import {OutputManager} from './outputManager';
 
-    o.open = function() {
-        o._socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
+declare let io: any; // socketio
 
-        o._socket.on('connect', function(msg) {
-            Message.pub('ws_connect', {});
+export class Socket {
+    private _socket;
+    private pMessage: Message;
+    private pOutputManager: OutputManager;
+    private pMxp: Mxp;
+
+    constructor(pMessage: Message, pOutputManager: OutputManager, pMxp: Mxp) {
+        this.pMessage = pMessage;
+        this.pOutputManager = pOutputManager;
+        this.pMxp = pMxp;
+
+        this.pMessage.sub('send_command', this.handle_send_command, this);
+        this.pMessage.sub('script_send_command', this.handle_send_command, this);
+        this.pMessage.sub('send_pw', this.handle_send_command, this);
+        this.pMessage.sub('trigger_send_commands', this.handle_trigger_send_commands, this);
+        this.pMessage.sub('alias_send_commands', this.handle_alias_send_commands, this);
+    }
+
+    public open() {
+        let o = this;
+
+        this._socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
+
+        this._socket.on('connect', (msg) => {
+            this.pMessage.pub('ws_connect', {});
         });
 
-        o._socket.on('disconnect', function(msg) {
-            Message.pub('ws_disconnect', {});
+        this._socket.on('disconnect', (msg) => {
+            this.pMessage.pub('ws_disconnect', {});
         });
 
-        o._socket.on('server_echo', function(msg) {
+        this._socket.on('server_echo', (msg) => {
             /* server echo true means we should NOT echo */
-//            console.log("echo");
-//            console.log(msg);
-            Message.pub('set_echo', {data: !msg.data});
+            this.pMessage.pub('set_echo', {value: !msg.data});
         });
 
-        o._socket.on("telnet_connect", function(msg) {
-            Message.pub('telnet_connect', msg);
+        this._socket.on("telnet_connect", (msg) => {
+            this.pMessage.pub('telnet_connect', msg);
         });
 
-        o._socket.on("telnet_disconnect", function(msg) {
-            Message.pub('telnet_disconnect', msg);
+        this._socket.on("telnet_disconnect", (msg) => {
+            this.pMessage.pub('telnet_disconnect', msg);
         });
 
-        o._socket.on("telnet_error", function(msg) {
-            Message.pub('telnet_error', msg);
+        this._socket.on("telnet_error", (msg) => {
+            this.pMessage.pub('telnet_error', msg);
         });
 
-        o._socket.on("msdp_var", function(msg) {
-            Message.pub('msdp_var', msg);
+        this._socket.on("msdp_var", (msg: MsgDef.msdp_var) => {
+            this.pMessage.pub('msdp_var', msg);
         });
 
-        o._socket.on("telnet_data", o._handle_telnet_data);
+        this._socket.on("telnet_data", (data) => {
+            this._handle_telnet_data(data);
+        });
 
-        o._socket.onerror = function(msg) {
-            Message.pub("ws_error", msg);
+        this._socket.onerror = (msg) => {
+            this.pMessage.pub("ws_error", msg);
         };
     };
 
-    o.open_telnet = function() {
-        o._socket.emit("open_telnet", {});
+    public open_telnet() {
+        this._socket.emit("open_telnet", {});
     };
 
-    o.close_telnet = function() {
-        o._socket.emit("close_telnet", {});
+    public close_telnet() {
+        this._socket.emit("close_telnet", {});
     };
 
-    o.handle_send_command = function(msg) {
+    private handle_send_command(msg) {
         console.time('send_command');
         console.time('command_resp');
-        o._socket.emit("send_command", msg, function(){
+        this._socket.emit("send_command", msg, () => {
             console.timeEnd('send_command');
         });
     };
 
-    o.handle_trigger_send_commands = function(msg) {
+    private handle_trigger_send_commands(msg) {
         for (var i=0; i < msg.cmds.length; i++) {
-            o._socket.emit("send_command", {data: msg.cmds[i]});
+            this._socket.emit("send_command", {data: msg.cmds[i]});
         }
     };
 
-    o.handle_alias_send_commands = function(msg) {
+    private handle_alias_send_commands(msg) {
         for (var i=0; i < msg.cmds.length; i++) {
-            o._socket.emit("send_command", {data: msg.cmds[i]});
+            this._socket.emit("send_command", {data: msg.cmds[i]});
         }
     };
 
-    var partial_seq;
-    o._handle_telnet_data = function(msg) {
+    private partial_seq;
+    private _handle_telnet_data(msg) {
         console.timeEnd('command_resp');
         console.time("_handle_telnet_data");
 
-        var rx = partial_seq || '';
-        partial_seq = null;
+        var rx = this.partial_seq || '';
+        this.partial_seq = null;
         rx += msg.data;
 
         var output = '';
@@ -96,11 +119,11 @@ var Socket = new (function() {
                 output += char;
                 i++;
 
-                OutputManager.handle_text(output);
+                this.pOutputManager.handleText(output);
                 output = '';
 
                 // MXP needs to force close any open tags on newline
-                MXP.handle_newline();
+                this.pMxp.handle_newline();
 
                 continue;
             }
@@ -121,12 +144,12 @@ var Socket = new (function() {
             re = /^\x1b\[(\d+(?:;\d+)?)m/;
             match = re.exec(substr);
             if (match) {
-                OutputManager.handle_text(output);
+                this.pOutputManager.handleText(output);
                 output = '';
 
                 i += match[0].length;
                 var codes = match[1].split(';');
-                OutputManager.handle_ansi_graphic_codes(codes);
+                this.pOutputManager.handleAnsiGraphicCodes(codes);
                 continue;
             }
 
@@ -134,11 +157,11 @@ var Socket = new (function() {
             re = /^\x1b\[[34]8;5;\d+m/;
             match = re.exec(substr);
             if (match) {
-                OutputManager.handle_text(output);
+                this.pOutputManager.handleText(output);
                 output = '';
 
                 i += match[0].length;
-                OutputManager.handle_xterm_escape(match[0]);
+                this.pOutputManager.handle_xterm_escape(match[0]);
                 continue;
             }
 
@@ -148,9 +171,9 @@ var Socket = new (function() {
             if (match) {
                 // MXP tag. no discerning what it is or if it's opening/closing tag here
                 i += match[0].length;
-                OutputManager.handle_text(output);
+                this.pOutputManager.handleText(output);
                 output = '';
-                Message.pub('mxp_tag', {data: match[1]});
+                this.pMessage.pub('mxp_tag', {data: match[1]});
                 continue;
             }
 
@@ -177,37 +200,28 @@ var Socket = new (function() {
                 we receive data...
              */
             if (i != 0) {
-                OutputManager.handle_text(output);
+                this.pOutputManager.handleText(output);
             }
-            partial_seq = rx.slice(i);
+            this.partial_seq = rx.slice(i);
             console.log("Got partial:");
-            console.log(partial_seq);
+            console.log(this.partial_seq);
             break;
         }
-        if (!partial_seq) {
+        if (!this.partial_seq) {
             /* if partial we already outputed, if not let's hit it */
-            OutputManager.handle_text(output);
+            this.pOutputManager.handleText(output);
         }
-        OutputManager.output_done();
+        this.pOutputManager.output_done();
 //        console.timeEnd("_handle_telnet_data");
 //        requestAnimationFrame(function() {
             console.timeEnd("_handle_telnet_data");
 //        });
     };
 
-    o.test_socket_response = function() {
+    private test_socket_response() {
         console.time('test_socket_response');
-        o._socket.emit('request_test_socket_response', {}, function() {
+        this._socket.emit('request_test_socket_response', {}, () => {
             console.timeEnd('test_socket_response');
         });
     };
-
-    return o;
-})();
-
-Message.sub('send_command', Socket.handle_send_command);
-Message.sub('script_send_command', Socket.handle_send_command);
-Message.sub('send_pw', Socket.handle_send_command);
-Message.sub('trigger_send_commands', Socket.handle_trigger_send_commands);
-Message.sub('alias_send_commands', Socket.handle_alias_send_commands);
-
+}

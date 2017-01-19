@@ -1,158 +1,174 @@
-var TrigAlEditBase = function() {
-    var o = this;
+import * as Util from './util'
 
-    o.win = null;
+declare let $;
+declare let CodeMirror;
 
-    /* these need to be set it get_elements*/
-    o.list_box = null;
-    o.pattern = null;
-    o.regex_checkbox = null;
-    o.script_checkbox = null;
-    o.text_area = null;
-    o.script_area = null;
-    o.code_mirror = null;
-    o.code_mirror_wrapper = null;
-    o.new_button = null;
-    o.delete_button = null;
-    o.main_split = null;
+export interface TrigAlItem {
+    pattern: string;
+    value: string;
+    regex: boolean;
+    is_script: boolean;
+}
+
+export abstract class TrigAlEditBase {
+    protected win = null;
+
+    /* these need to be set in get_elements*/
+    protected list_box;
+    protected pattern;
+    protected regex_checkbox;
+    protected script_checkbox;
+    protected text_area;
+    protected script_area;
+    protected code_mirror;
+    protected code_mirror_wrapper;
+    protected new_button;
+    protected delete_button;
+    protected main_split;
+    protected save_button;
+    protected cancel_button;
 
     /* these need to be overridden */
-    o.get_elements = null;
-    o.get_list = null;
-    o.get_item = null;
-    o.save_item = null;
-    o.delete_item = null;
+    protected abstract get_elements();  
+    protected abstract get_list() : Array<string>;
+    protected abstract get_item(ind: number) : TrigAlItem;
+    protected abstract save_item(ind: number, pattern: string, value: string, checked: boolean, is_script: boolean);
+    protected abstract delete_item(ind: number);
 
-    o.set_editor_disabled = function(state) {
-        o.pattern.prop('disabled', state);
-        o.regex_checkbox.prop('disabled', state);
-        o.script_checkbox.prop('disabled', state);
-        o.text_area.prop('disabled', state);
-        o.code_mirror_wrapper.prop('disabled', state);
-        o.save_button.prop('disabled', state);
-        o.cancel_button.prop('disabled', state);
-    };
+    protected abstract default_pattern: string = null;
+    protected abstract default_value: string = null;
+    protected abstract default_script: string = null;
 
-    o.select_none = function() {
-        o.list_box.prop('selectedItem', 0);
-        o.list_box.val([]);
-    };
+    private set_editor_disabled(state) {
+        this.pattern.prop('disabled', state);
+        this.regex_checkbox.prop('disabled', state);
+        this.script_checkbox.prop('disabled', state);
+        this.text_area.prop('disabled', state);
+        this.code_mirror_wrapper.prop('disabled', state);
+        this.save_button.prop('disabled', state);
+        this.cancel_button.prop('disabled', state);
+    }
 
-    o.clear_editor = function() {
-        o.pattern.val('');
-        o.text_area.val('');
-        o.regex_checkbox.prop('checked', false);
-        o.script_checkbox.prop('checked', false);
-    };
+    private select_none() {
+        this.list_box.prop('selectedItem', 0);
+        this.list_box.val([]);
+    }
 
-    o.update_list_box = function() {
-        var lst = o.get_list();
+    private clear_editor() {
+        this.pattern.val('');
+        this.text_area.val('');
+        this.regex_checkbox.prop('checked', false);
+        this.script_checkbox.prop('checked', false);
+    }
+
+    private update_list_box() {
+        var lst = this.get_list();
         var html = '';
         for (var i=0; i < lst.length; i++) {
             html += '<option>' + Util.raw_to_html(lst[i]) + '</option>';
         }
-        o.list_box.html(html);
+        this.list_box.html(html);
     };
 
-    var handle_save_button_click = function() {
-        var ind = o.list_box.prop('selectedIndex');
-        var is_script = o.script_checkbox.is(':checked');
+    private handle_save_button_click() {
+        var ind = this.list_box.prop('selectedIndex');
+        var is_script = this.script_checkbox.is(':checked');
 
-        o.save_item(
+        this.save_item(
             ind,
-            o.pattern.val(),
-            is_script ? o.code_mirror.getValue() : o.text_area.val(),
-            o.regex_checkbox.is(':checked'),
+            this.pattern.val(),
+            is_script ? this.code_mirror.getValue() : this.text_area.val(),
+            this.regex_checkbox.is(':checked'),
             is_script
         );
 
-        o.select_none();
-        o.clear_editor();
-        o.set_editor_disabled(true);
-        o.update_list_box();
+        this.select_none();
+        this.clear_editor();
+        this.set_editor_disabled(true);
+        this.update_list_box();
+    }
+
+    private handle_cancel_button_click() {
+        this.clear_editor();
+        this.select_none();
+        this.set_editor_disabled(true);
+    }
+
+    private handle_new_button_click() {
+        this.set_editor_disabled(false);
+        this.select_none();
+        this.pattern.val(this.default_pattern || "INPUT PATTERN HERE");
+        this.text_area.val(this.default_value || "INPUT VALUE HERE");
+        this.code_mirror.setValue(this.default_script || "// INPUT SCRIPT HERE");
+    }
+
+    private handle_delete_button_click() {
+        var ind = this.list_box.prop('selectedIndex');
+
+        this.delete_item(ind);
+
+        this.clear_editor();
+        this.select_none();
+        this.set_editor_disabled(true);
+        this.update_list_box();
+    }
+
+    private show_script_input() {
+        this.text_area.hide();
+        this.code_mirror_wrapper.show();
+        this.code_mirror.refresh();
     };
 
-    var handle_cancel_button_click = function() {
-        o.clear_editor();
-        o.select_none();
-        o.set_editor_disabled(true);
+    private show_text_input() {
+        this.code_mirror_wrapper.hide();
+        this.text_area.show();
     };
 
-    var handle_new_button_click = function() {
-        o.set_editor_disabled(false);
-        o.select_none();
-        o.pattern.val(o.default_pattern || "INPUT PATTERN HERE");
-        o.text_area.val(o.default_value || "INPUT VALUE HERE");
-        o.code_mirror.setValue(o.default_script || "// INPUT SCRIPT HERE");
-    };
-
-    var handle_delete_button_click = function() {
-        var ind = o.list_box.prop('selectedIndex');
-
-        o.delete_item(ind);
-
-        o.clear_editor();
-        o.select_none();
-        o.set_editor_disabled(true);
-        o.update_list_box();
-    };
-
-    var show_script_input = function() {
-        o.text_area.hide();
-        o.code_mirror_wrapper.show();
-        o.code_mirror.refresh();
-    };
-
-    var show_text_input = function() {
-        o.code_mirror_wrapper.hide();
-        o.text_area.show();
-    };
-
-    var handle_list_box_change = function() {
-        var ind = o.list_box.prop('selectedIndex');
-        var item = o.get_item(ind);
+    private handle_list_box_change() {
+        var ind = this.list_box.prop('selectedIndex');
+        var item = this.get_item(ind);
 
         if (!item) {
             return;
         }
-        o.set_editor_disabled(false);
-        o.pattern.val(item.pattern);
+        this.set_editor_disabled(false);
+        this.pattern.val(item.pattern);
         if (item.is_script) {
-            show_script_input();
-            o.code_mirror.setValue(item.value);
-            o.text_area.val('');
+            this.show_script_input();
+            this.code_mirror.setValue(item.value);
+            this.text_area.val('');
         } else {
-            show_text_input();
-            o.text_area.val(item.value);
-            o.code_mirror.setValue('');
+            this.show_text_input();
+            this.text_area.val(item.value);
+            this.code_mirror.setValue('');
         }
-        o.regex_checkbox.prop('checked', item.regex ? true : false);
-        o.script_checkbox.prop('checked', item.is_script ? true : false);
+        this.regex_checkbox.prop('checked', item.regex ? true : false);
+        this.script_checkbox.prop('checked', item.is_script ? true : false);
     };
 
-    var handle_script_checkbox_change = function() {
-        var checked = o.script_checkbox.prop('checked');
+    private handle_script_checkbox_change() {
+        var checked = this.script_checkbox.prop('checked');
         if (checked) {
-            show_script_input();
+            this.show_script_input();
         } else {
-            show_text_input();
+            this.show_text_input();
         }
     };
 
-    o.create_window = function() {
-        o.get_elements();
+    private create_window() {
+        this.get_elements();
 
-        o.win.jqxWindow({width: 600, height: 400});
+        this.win.jqxWindow({width: 600, height: 400});
 
-        o.main_split.jqxSplitter({
+        this.main_split.jqxSplitter({
             width: '100%',
             height: '100%',
             orientation: 'vertical',
             panels: [{size:'25%'},{size:'75%'}]
         });
 
-        o.code_mirror = CodeMirror.fromTextArea(
-            o.script_area[0], {
+        this.code_mirror = CodeMirror.fromTextArea(
+            this.script_area[0], {
                 mode: 'javascript',
                 theme: 'neat',
                 autoRefresh: true, // https://github.com/codemirror/CodeMirror/issues/3098
@@ -160,27 +176,26 @@ var TrigAlEditBase = function() {
                 lineNumbers: true
             }
         );
-        o.code_mirror_wrapper = $(o.code_mirror.getWrapperElement());
-        o.code_mirror_wrapper.height('100%');
-        o.code_mirror_wrapper.hide();
+        this.code_mirror_wrapper = $(this.code_mirror.getWrapperElement());
+        this.code_mirror_wrapper.height('100%');
+        this.code_mirror_wrapper.hide();
 
-        o.list_box.change(handle_list_box_change);
-        o.new_button.click(handle_new_button_click);
-        o.delete_button.click(handle_delete_button_click);
-        o.save_button.click(handle_save_button_click);
-        o.cancel_button.click(handle_cancel_button_click);
-        o.script_checkbox.change(handle_script_checkbox_change);
+        this.list_box.change(this.handle_list_box_change);
+        this.new_button.click(this.handle_new_button_click);
+        this.delete_button.click(this.handle_delete_button_click);
+        this.save_button.click(this.handle_save_button_click);
+        this.cancel_button.click(this.handle_cancel_button_click);
+        this.script_checkbox.change(this.handle_script_checkbox_change);
     };
 
-    o.show = function() {
-        if (!o.win) {
-            o.create_window();
+    public show() {
+        if (!this.win) {
+            this.create_window();
         }
 
-        o.update_list_box();
+        this.update_list_box();
 
-        o.win.jqxWindow('open');
+        this.win.jqxWindow('open');
     };
 
-    return o;
-};
+}
