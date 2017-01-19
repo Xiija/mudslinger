@@ -1,22 +1,22 @@
-import {Message} from './message';
+import {Message} from "./message";
 
 function makeScript(text, pMessage) {
     let script_func;
     /* Scripting API section */
     let send = function(cmd) {
-        pMessage.pub('script_send_command', {data: cmd});
+        pMessage.pub("script_send_command", {data: cmd});
     };
 
     let print = function(message) {
-        pMessage.pub('script_print', {data: message});
+        pMessage.pub("script_print", {data: message});
     };
     /* end Scripting API section */
 
     try {
-        eval('script_func = function(match) {"use strict";' + text + '}');
+        eval("script_func = function(match) {\"use strict\";" + text + "}");
     }
     catch (err) {
-        pMessage.pub('script_eval_error', {data: err});
+        pMessage.pub("script_eval_error", {data: err});
         return null;
     }
 
