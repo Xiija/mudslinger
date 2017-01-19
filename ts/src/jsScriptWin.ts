@@ -1,4 +1,4 @@
-import {JsScript} from './jsScript';
+import {JsScript} from "./jsScript";
 
 declare let $;
 declare let CodeMirror;
@@ -15,14 +15,14 @@ export class JsScriptWin {
     }
 
     private handle_run_button_click() {
-        var code_text = this.code_mirror.getValue();
-        var script = this.pJsScript.makeScript(code_text);
-        if (script) {script.RunScript()};
+        let code_text = this.code_mirror.getValue();
+        let script = this.pJsScript.makeScript(code_text);
+        if (script) { script.RunScript(); };
     };
 
     private get_elements() {
-        this.win = $('#win_js_script');
-        this.run_button = $('#win_js_script_run_button')
+        this.win = $("#win_js_script");
+        this.run_button = $("#win_js_script_run_button");
     };
 
     private create_window() {
@@ -32,8 +32,8 @@ export class JsScriptWin {
         this.code_mirror = CodeMirror.fromTextArea(
             document.getElementById("win_js_script_code"),
             {
-                mode: 'javascript',
-                theme: 'neat',
+                mode: "javascript",
+                theme: "neat",
                 autoRefresh: true, // https://github.com/codemirror/CodeMirror/issues/3098
                 matchBrackets: true,
                 lineNumbers: true
@@ -49,6 +49,6 @@ export class JsScriptWin {
             this.create_window();
         }
 
-        this.win.jqxWindow('open');
+        this.win.jqxWindow("open");
     };
 }
