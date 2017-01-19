@@ -29,7 +29,7 @@ class Callback {
     }
 }
 
-export module MsgDef {
+export namespace MsgDef {
     export interface msdp_var {
         varname: string;
         value: string;
