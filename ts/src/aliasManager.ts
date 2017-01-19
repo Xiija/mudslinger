@@ -1,10 +1,10 @@
-import {JsScript} from './jsScript';
-import {Message} from './message';
-import {TrigAlItem} from './trigAlEditBase';
+import {JsScript} from "./jsScript";
+import {Message} from "./message";
+import {TrigAlItem} from "./trigAlEditBase";
 
 declare let $;
 
-export class AliasManager{
+export class AliasManager {
     private pMessage: Message;
     private pJsScript: JsScript;
     private enabled: boolean = true;
@@ -13,11 +13,11 @@ export class AliasManager{
     constructor(pMessage: Message, pJsScript: JsScript) {
         this.pMessage = pMessage;
         this.pJsScript = pJsScript;
-        
-        this.pMessage.sub('set_aliases_enabled', this.handle_set_aliases_enabled, this);
+
+        this.pMessage.sub("set_aliases_enabled", this.handle_set_aliases_enabled, this);
 
         $(document).ready(() => {
-            var saved_aliases = localStorage.getItem("aliases");
+            let saved_aliases = localStorage.getItem("aliases");
             if (!saved_aliases) {
                 this.aliases = [];
             } else {
@@ -27,7 +27,7 @@ export class AliasManager{
     }
 
     public save_aliases() {
-        localStorage.setItem('aliases', JSON.stringify(this.aliases));
+        localStorage.setItem("aliases", JSON.stringify(this.aliases));
     };
 
     private handle_set_aliases_enabled(value: boolean) {
@@ -40,8 +40,8 @@ export class AliasManager{
     public check_alias(cmd: string) {
         if (!this.enabled) return;
 
-        for (var i=0; i < this.aliases.length; i++) {
-            var alias = this.aliases[i];
+        for (let i = 0; i < this.aliases.length; i++) {
+            let alias = this.aliases[i];
 
             if (alias.regex) {
                 let re = alias.pattern;
@@ -51,32 +51,30 @@ export class AliasManager{
                 }
 
                 if (alias.is_script) {
-                    var script = this.pJsScript.makeScript(alias.value);
-                    if (script) {script.RunScript(match)};
+                    let script = this.pJsScript.makeScript(alias.value);
+                    if (script) { script.RunScript(match); };
                     return true;
                 } else {
-                    var value = alias.value;
+                    let value = alias.value;
 
                     value = value.replace(/\$(\d+)/g, function(m, d) {
-                        return match[parseInt(d)] || '';
+                        return match[parseInt(d)] || "";
                     });
                     return value;
                 }
             } else {
-                let re = '^' + alias.pattern + '\\s*(.*)$';
+                let re = "^" + alias.pattern + "\\s*(.*)$";
                 let match = cmd.match(re);
                 if (!match) {
                     continue;
                 }
 
                 if (alias.is_script) {
-                    var script = this.pJsScript.makeScript(alias.value);
-                    if (script) {script()};
+                    let script = this.pJsScript.makeScript(alias.value);
+                    if (script) { script(); };
                     return true;
                 } else {
-                    var value = alias.value;
-
-                    var value = alias.value.replace("$1", match[1] || '');
+                    let value = alias.value.replace("$1", match[1] || "");
                     return value;
                 }
             }
