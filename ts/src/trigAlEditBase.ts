@@ -1,4 +1,4 @@
-import * as Util from './util'
+import * as Util from "./util";
 
 declare let $;
 declare let CodeMirror;
@@ -29,9 +29,9 @@ export abstract class TrigAlEditBase {
     protected cancel_button;
 
     /* these need to be overridden */
-    protected abstract get_elements();  
-    protected abstract get_list() : Array<string>;
-    protected abstract get_item(ind: number) : TrigAlItem;
+    protected abstract get_elements();
+    protected abstract get_list(): Array<string>;
+    protected abstract get_item(ind: number): TrigAlItem;
     protected abstract save_item(ind: number, pattern: string, value: string, checked: boolean, is_script: boolean);
     protected abstract delete_item(ind: number);
 
@@ -40,45 +40,45 @@ export abstract class TrigAlEditBase {
     protected abstract default_script: string = null;
 
     private set_editor_disabled(state) {
-        this.pattern.prop('disabled', state);
-        this.regex_checkbox.prop('disabled', state);
-        this.script_checkbox.prop('disabled', state);
-        this.text_area.prop('disabled', state);
-        this.code_mirror_wrapper.prop('disabled', state);
-        this.save_button.prop('disabled', state);
-        this.cancel_button.prop('disabled', state);
+        this.pattern.prop("disabled", state);
+        this.regex_checkbox.prop("disabled", state);
+        this.script_checkbox.prop("disabled", state);
+        this.text_area.prop("disabled", state);
+        this.code_mirror_wrapper.prop("disabled", state);
+        this.save_button.prop("disabled", state);
+        this.cancel_button.prop("disabled", state);
     }
 
     private select_none() {
-        this.list_box.prop('selectedItem', 0);
+        this.list_box.prop("selectedItem", 0);
         this.list_box.val([]);
     }
 
     private clear_editor() {
-        this.pattern.val('');
-        this.text_area.val('');
-        this.regex_checkbox.prop('checked', false);
-        this.script_checkbox.prop('checked', false);
+        this.pattern.val("");
+        this.text_area.val("");
+        this.regex_checkbox.prop("checked", false);
+        this.script_checkbox.prop("checked", false);
     }
 
     private update_list_box() {
-        var lst = this.get_list();
-        var html = '';
-        for (var i=0; i < lst.length; i++) {
-            html += '<option>' + Util.raw_to_html(lst[i]) + '</option>';
+        let lst = this.get_list();
+        let html = "";
+        for (let i = 0; i < lst.length; i++) {
+            html += "<option>" + Util.raw_to_html(lst[i]) + "</option>";
         }
         this.list_box.html(html);
     };
 
     private handle_save_button_click() {
-        var ind = this.list_box.prop('selectedIndex');
-        var is_script = this.script_checkbox.is(':checked');
+        let ind = this.list_box.prop("selectedIndex");
+        let is_script = this.script_checkbox.is(":checked");
 
         this.save_item(
             ind,
             this.pattern.val(),
             is_script ? this.code_mirror.getValue() : this.text_area.val(),
-            this.regex_checkbox.is(':checked'),
+            this.regex_checkbox.is(":checked"),
             is_script
         );
 
@@ -103,7 +103,7 @@ export abstract class TrigAlEditBase {
     }
 
     private handle_delete_button_click() {
-        var ind = this.list_box.prop('selectedIndex');
+        let ind = this.list_box.prop("selectedIndex");
 
         this.delete_item(ind);
 
@@ -125,8 +125,8 @@ export abstract class TrigAlEditBase {
     };
 
     private handle_list_box_change() {
-        var ind = this.list_box.prop('selectedIndex');
-        var item = this.get_item(ind);
+        let ind = this.list_box.prop("selectedIndex");
+        let item = this.get_item(ind);
 
         if (!item) {
             return;
@@ -136,18 +136,18 @@ export abstract class TrigAlEditBase {
         if (item.is_script) {
             this.show_script_input();
             this.code_mirror.setValue(item.value);
-            this.text_area.val('');
+            this.text_area.val("");
         } else {
             this.show_text_input();
             this.text_area.val(item.value);
-            this.code_mirror.setValue('');
+            this.code_mirror.setValue("");
         }
-        this.regex_checkbox.prop('checked', item.regex ? true : false);
-        this.script_checkbox.prop('checked', item.is_script ? true : false);
+        this.regex_checkbox.prop("checked", item.regex ? true : false);
+        this.script_checkbox.prop("checked", item.is_script ? true : false);
     };
 
     private handle_script_checkbox_change() {
-        var checked = this.script_checkbox.prop('checked');
+        let checked = this.script_checkbox.prop("checked");
         if (checked) {
             this.show_script_input();
         } else {
@@ -161,23 +161,23 @@ export abstract class TrigAlEditBase {
         this.win.jqxWindow({width: 600, height: 400});
 
         this.main_split.jqxSplitter({
-            width: '100%',
-            height: '100%',
-            orientation: 'vertical',
-            panels: [{size:'25%'},{size:'75%'}]
+            width: "100%",
+            height: "100%",
+            orientation: "vertical",
+            panels: [{size: "25%"}, {size: "75%"}]
         });
 
         this.code_mirror = CodeMirror.fromTextArea(
             this.script_area[0], {
-                mode: 'javascript',
-                theme: 'neat',
+                mode: "javascript",
+                theme: "neat",
                 autoRefresh: true, // https://github.com/codemirror/CodeMirror/issues/3098
                 matchBrackets: true,
                 lineNumbers: true
             }
         );
         this.code_mirror_wrapper = $(this.code_mirror.getWrapperElement());
-        this.code_mirror_wrapper.height('100%');
+        this.code_mirror_wrapper.height("100%");
         this.code_mirror_wrapper.hide();
 
         this.list_box.change(this.handle_list_box_change);
@@ -195,7 +195,7 @@ export abstract class TrigAlEditBase {
 
         this.update_list_box();
 
-        this.win.jqxWindow('open');
+        this.win.jqxWindow("open");
     };
 
 }
