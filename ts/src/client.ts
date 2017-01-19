@@ -1,21 +1,21 @@
-import {AffWin} from './affWin';
-import {AliasEditor} from './aliasEditor';
-import {AliasManager} from './aliasManager';
-import {ChatWin} from './chatWin';
-import {CommandInput} from './commandInput';
-import {GaugeWin} from './gaugeWin';
-import {JsScript} from './jsScript';
-import {JsScriptWin} from './jsScriptWin';
-import {MapWin} from './mapWin';
-import {MenuBar} from './menuBar';
-import {Message} from './message';
-import {Mxp} from './mxp';
-import {OutputManager} from './outputManager';
-import {OutputWin} from './outputWin';
-import {Socket} from './socket';
-import {StatWin} from './statWin';
-import {TriggerEditor} from './triggerEditor';
-import {TriggerManager} from './triggerManager';
+import {AffWin} from "./affWin";
+import {AliasEditor} from "./aliasEditor";
+import {AliasManager} from "./aliasManager";
+import {ChatWin} from "./chatWin";
+import {CommandInput} from "./commandInput";
+import {GaugeWin} from "./gaugeWin";
+import {JsScript} from "./jsScript";
+import {JsScriptWin} from "./jsScriptWin";
+import {MapWin} from "./mapWin";
+import {MenuBar} from "./menuBar";
+import {Message} from "./message";
+import {Mxp} from "./mxp";
+import {OutputManager} from "./outputManager";
+import {OutputWin} from "./outputWin";
+import {Socket} from "./socket";
+import {StatWin} from "./statWin";
+import {TriggerEditor} from "./triggerEditor";
+import {TriggerManager} from "./triggerManager";
 
 declare let $;
 
@@ -55,10 +55,10 @@ export class Client {
         this.pCommandInput = new CommandInput(this.pMessage, this.pAliasManager);
 
         this.pOutputWin = new OutputWin(this.pMessage, this.pTriggerManager);
-        
+
         this.pAliasEditor = new AliasEditor(this.pAliasManager);
         this.pTriggerEditor = new TriggerEditor(this.pTriggerManager);
-        
+
         this.pOutputManager = new OutputManager(this.pMessage, this.pOutputWin);
 
         this.pMxp = new Mxp(this.pMessage, this.pOutputManager, this.pChatWin);
@@ -82,22 +82,22 @@ export class Client {
     private html_base;
 
     private load_layout() {
-        // If it's the first load, grab the base html so we can
+        // If it"s the first load, grab the base html so we can
         // use it for reloads
         if (!this.html_base) {
-            this.html_base = $('#client').html();
+            this.html_base = $("#client").html();
 //            console.log(html_base);
         } else {
-            // it's a reload
-            $('#client').html(this.html_base);
+            // it"s a reload
+            $("#client").html(this.html_base);
         };
 
         // do the high level layout
-        $('#main_vert_split').jqxSplitter({
-            width: '100%',
-            height: '100%',
-            orientation: 'vertical',
-            panels: [{size:'75%'},{size:'25%'}]
+        $("#main_vert_split").jqxSplitter({
+            width: "100%",
+            height: "100%",
+            orientation: "vertical",
+            panels: [{size: "75%"}, {size: "25%"}]
         });
 
         // let the other guys do their thing
