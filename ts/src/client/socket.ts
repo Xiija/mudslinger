@@ -122,8 +122,8 @@ export class Socket {
 
     private partialSeq: string;
     private handleTelnetData(data: ArrayBuffer) {
-        console.timeEnd("command_resp");
-        console.time("_handle_telnet_data");
+        // console.timeEnd("command_resp");
+        // console.time("_handle_telnet_data");
 
         let rx = this.partialSeq || "";
         this.partialSeq = null;
@@ -239,10 +239,6 @@ export class Socket {
             this.outputManager.handleText(output);
         }
         this.outputManager.outputDone();
-//        console.timeEnd("_handle_telnet_data");
-//        requestAnimationFrame(function() {
-            console.timeEnd("_handle_telnet_data");
-//        });
-    };
-
+        // console.timeEnd("_handle_telnet_data");
+    }
 }
