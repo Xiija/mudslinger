@@ -2,6 +2,8 @@ import { GlEvent, GlDef } from "./event";
 
 import { UserConfig } from "./userConfig";
 
+import { getUrlParameter } from "./util";
+
 import { Client } from "./client";
 import { Socket } from "./socket";
 import { AliasEditor } from "./aliasEditor";
@@ -66,7 +68,17 @@ export class MenuBar {
             if (configClient.hardcodedTarget === true) {
                 this.socket.openTelnet(null, null);
             } else {
-                this.connectWin.show();
+                let hostParam = getUrlParameter("host");
+                let portParam = getUrlParameter("port");
+
+                if (hostParam !== undefined && portParam !== undefined) {
+                    let host = hostParam.trim();
+                    let port = Number(portParam.trim());
+
+                    this.socket.openTelnet(host, port);
+                } else {
+                    this.connectWin.show();
+                }
             }
         };
 

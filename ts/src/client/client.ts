@@ -1,5 +1,7 @@
 /// <reference path="../../definitions/polyfill.d.ts" />
 
+import { getUrlParameter } from "./util";
+
 import { GlEvent } from "./event";
 import { UserConfig } from "./userConfig";
 import { AppInfo } from "./appInfo";
@@ -73,7 +75,18 @@ export class Client {
         if (configClient.hardcodedTarget === true) {
             this.socket.openTelnet(null, null);
         } else {
-            this.connectWin.show();
+            let hostParam: string = getUrlParameter("host");
+            let portParam: string = getUrlParameter("port");
+
+            if (hostParam !== undefined && portParam !== undefined)
+            {
+                let host = hostParam.trim();
+                let port = Number(portParam);
+                this.socket.openTelnet(host, port);
+
+            } else {
+                this.connectWin.show();
+            }
         }
     }
 
