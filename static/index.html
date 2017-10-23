@@ -72,8 +72,15 @@
   <div id="mainWin">
     <pre id="winOutput" class="outputText"></pre>
     <!--<br>-->
-    <textarea rows="1" id="cmdInput"></textarea>
-    <input id="cmdInputPw" type="password" style="display:none">
+    <div id="cmdCont">
+      <textarea rows="1" id="cmdInput"></textarea>
+      <input id="cmdInputPw" type="password" style="display:none">
+      <div class="chkCmdInputCmdStackCont" style="border:1px solid green">
+        <span class="toolTipText">Toggle command stacking</span>
+        <input id="chkCmdStack" type="checkbox" checked>
+        ;
+      </div>
+    </div>
   </div>
 </div>
 </body>

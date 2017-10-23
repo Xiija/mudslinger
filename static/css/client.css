@@ -24,6 +24,13 @@ a:link, a:visited {
     width:100%;
 }
 
+#cmdCont {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+}
+
 #winOutput {
     height:calc(100% - 21px);
     margin:0;
@@ -42,19 +49,30 @@ a:link, a:visited {
 }
 
 #cmdInput, #cmdInputPw {
-    width: 100%;
     margin: 0;
     padding: 0;
+    flex: 1;
 }
 
 #cmdInput {
     resize: none;
     font-family:"Courier", monospace;
     font-size: small;
+    display: inline;
 }
 
 #cmdInputPw {
     height: 20px;
+}
+
+.chkCmdInputCmdStackCont .toolTipText {
+    display: none;
+    font-family:"Courier", monospace;
+    font-size: small;
+}
+
+.chkCmdInputCmdStackCont:hover .toolTipText {
+    display: inline;
 }
 
 .winEdit-pattern {

@@ -9,9 +9,13 @@ export class CommandInput {
     private $cmdInput: JQuery;
     private $cmdInputPw: JQuery;
 
+    private chkCmdStack: HTMLInputElement;
+
     constructor(private aliasManager: AliasManager) {
         this.$cmdInput = $("#cmdInput");
         this.$cmdInputPw = $("#cmdInputPw");
+
+        this.chkCmdStack = $("#chkCmdStack")[0] as HTMLInputElement;
 
         this.$cmdInput.keydown((event: KeyboardEvent) => { return this.keydown(event); });
         this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });
@@ -62,9 +66,13 @@ export class CommandInput {
         let cmd: string = this.$cmdInput.val();
         let result = this.aliasManager.checkAlias(cmd);
         if (!result) {
-            let cmds = cmd.split(";");
-            for (let i = 0; i < cmds.length; i++) {
-                GlEvent.sendCommand.fire({value: cmds[i]});
+            if (this.chkCmdStack.checked) {
+                let cmds = cmd.split(";");
+                for (let i = 0; i < cmds.length; i++) {
+                    GlEvent.sendCommand.fire({value: cmds[i]});
+                }
+            } else {
+                GlEvent.sendCommand.fire({value: cmd});
             }
         } else if (result !== true) {
             let cmds: string[] = [];
