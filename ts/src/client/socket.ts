@@ -178,7 +178,7 @@ export class Socket {
             let match;
 
             /* ansi escapes */
-            re = /^\x1b\[(\d+(?:;\d+)?)m/;
+            re = /^\x1b\[([0-9;]*)m/;
             match = re.exec(substr);
             if (match) {
                 this.outputManager.handleText(output);
