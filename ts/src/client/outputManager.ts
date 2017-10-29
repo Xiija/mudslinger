@@ -116,12 +116,7 @@ export class OutputManager {
         return this.bgColor || ansiColors[this.defaultAnsiBg[0]][this.defaultAnsiBg[1]];
     }
 
-    public handleXtermEscape(data: string) {
-        let splt = data.split(";");
-        let color_code = splt[2].slice(0, -1); // kill the "m"
-        color_code = parseInt(color_code).toString();
-        let is_bg = (splt[0] === "\x1b[48"); // 38 is fg, 48 is bg
-
+    private handleXtermEscape(color_code: number, is_bg: boolean ) {
         let html_color = xterm_cols[color_code];
 
         if (is_bg) {
@@ -135,6 +130,19 @@ export class OutputManager {
 
     /* handles graphics mode codes http://ascii-table.com/ansi-escape-sequences.php*/
     public handleAnsiGraphicCodes(codes: Array<string>) {
+        /* Special case XTERM 256 color format */
+        if (codes.length === 3)
+        {
+            if (codes[0] === "38" && codes[1] === "5") {
+                this.handleXtermEscape(parseInt(codes[2]), false);
+                return;
+            } else if (codes[0] == "48" && codes[1] == "5") {
+                this.handleXtermEscape(parseInt(codes[2]), true);
+                return;
+            }
+        }
+
+        /* Standard ANSI color sequence */
         let new_fg: ansiColorTuple;
         let new_bg: ansiColorTuple;
 
