@@ -210,10 +210,22 @@ export class Socket {
                 continue;
             }
 
-            /* need to account for malformed tags or sequences somehow... for now just treat a newline as a boundary */
+            /* need to account for malformed or unsupported tags or sequences somehow... so treat start of another sequence and new lines as boundaries */
+            let esc_ind = substr.slice(1).indexOf("\x1b");
             let nl_ind = substr.indexOf("\n");
+            let bound_ind = null;
+
+            /* Use whichever boundary appears first */
+            if (esc_ind !== -1) {
+                bound_ind = esc_ind;
+                console.log("esc_ind", esc_ind)
+            }
             if (nl_ind !== -1) {
-                let bad_stuff = substr.slice(0, nl_ind + 1);
+                bound_ind = (bound_ind === null) ? nl_ind : Math.min(bound_ind, nl_ind);
+            }
+
+            if (bound_ind !== null) {
+                let bad_stuff = substr.slice(0, bound_ind + 1);
                 i += bad_stuff.length;
                 console.log("Malformed sequence or tag");
                 console.log(bad_stuff);
