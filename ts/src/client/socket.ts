@@ -218,7 +218,6 @@ export class Socket {
             /* Use whichever boundary appears first */
             if (esc_ind !== -1) {
                 bound_ind = esc_ind;
-                console.log("esc_ind", esc_ind)
             }
             if (nl_ind !== -1) {
                 bound_ind = (bound_ind === null) ? nl_ind : Math.min(bound_ind, nl_ind);
