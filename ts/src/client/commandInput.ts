@@ -24,7 +24,10 @@ export class CommandInput {
         GlEvent.setEcho.handle(this.handleSetEcho, this);
         GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
 
-        $(document).ready(() => { this.loadHistory(); });
+        $(document).ready(() => {
+            this.loadHistory();
+            this.inputChange(); // Force a resize
+        });
     }
 
     private echo: boolean = true;
@@ -35,6 +38,7 @@ export class CommandInput {
             this.$cmdInputPw.hide();
             this.$cmdInput.show();
             this.$cmdInput.val("");
+            this.inputChange();
             this.$cmdInput.focus();
         } else {
             this.$cmdInput.hide();
@@ -100,6 +104,7 @@ export class CommandInput {
         }
         else {
             this.$cmdInput.val("");
+            this.inputChange();
         }
         this.cmd_index = -1;
     };
@@ -132,6 +137,7 @@ export class CommandInput {
                     this.cmd_index = Math.max(this.cmd_index, 0);
                 }
                 this.$cmdInput.val(this.cmd_history[this.cmd_index]);
+                this.inputChange();
                 this.$cmdInput.select();
                 return false;
             case 40: // down
@@ -141,6 +147,7 @@ export class CommandInput {
                 this.cmd_index += 1;
                 this.cmd_index = Math.min(this.cmd_index, this.cmd_history.length - 1);
                 this.$cmdInput.val(this.cmd_history[this.cmd_index]);
+                this.inputChange();
                 this.$cmdInput.select();
                 return false;
             default:
