@@ -150,6 +150,50 @@ export class CommandInput {
                 this.inputChange();
                 this.$cmdInput.select();
                 return false;
+            case 97:
+                this.$cmdInput.val("southwest");
+                this.sendCmd();
+                return false;
+            case 98:
+                this.$cmdInput.val("south");
+                this.sendCmd()
+                return false;
+            case 99:
+                this.$cmdInput.val("southeast");
+                this.sendCmd();
+                return false;
+            case 100:
+                this.$cmdInput.val("west");
+                this.sendCmd();
+                return false;
+            case 101:
+                this.$cmdInput.val("look");
+                this.sendCmd();
+                return false;
+            case 102:
+                this.$cmdInput.val("east");
+                this.sendCmd();
+                return false;
+            case 103:
+                this.$cmdInput.val("northwest");
+                this.sendCmd();
+                return false;
+            case 104:
+                this.$cmdInput.val("north");
+                this.sendCmd();
+                return false;
+            case 105:
+                this.$cmdInput.val("northeast");
+                this.sendCmd();
+                return false;
+            case 107:
+                this.$cmdInput.val("down");
+                this.sendCmd();
+                return false;
+            case 109:
+                this.$cmdInput.val("up");
+                this.sendCmd();
+                return false;
             default:
                 this.cmd_index = -1;
                 return true;
