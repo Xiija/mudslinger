@@ -5,6 +5,7 @@ import {AliasManager} from "./aliasManager";
 export class CommandInput {
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
+    private cmd_entered: string = "";
 
     private $cmdInput: JQuery;
     private $cmdInputPw: JQuery;
@@ -131,6 +132,7 @@ export class CommandInput {
                 }
             case 38: // up
                 if (this.cmd_index === -1) {
+                    this.cmd_entered = this.$cmdInput.val();
                     this.cmd_index = this.cmd_history.length - 1;
                 } else {
                     this.cmd_index -= 1;
@@ -144,8 +146,15 @@ export class CommandInput {
                 if (this.cmd_index === -1) {
                     break;
                 }
-                this.cmd_index += 1;
-                this.cmd_index = Math.min(this.cmd_index, this.cmd_history.length - 1);
+
+                if (this.cmd_index === (this.cmd_history.length - 1)) {
+                    // Already at latest, grab entered but unsent value
+                    this.cmd_index = -1;
+                    this.$cmdInput.val(this.cmd_entered);
+                } else {
+                    this.cmd_index += 1;
+                    this.$cmdInput.val(this.cmd_history[this.cmd_index]);
+                }
                 this.$cmdInput.val(this.cmd_history[this.cmd_index]);
                 this.inputChange();
                 this.$cmdInput.select();
