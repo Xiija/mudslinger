@@ -52,6 +52,6 @@ print("deadOrcs: " + this.deadOrcs);
 if (this.deadOrcs < 10) {
   send("kill orc");
 } else {
-  send("Already killed 10 orcs.");
+  send("say Already killed 10 orcs.");
 }
 ```
