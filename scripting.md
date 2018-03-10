@@ -3,10 +3,12 @@
 All scripts have access to the following scripting API functions:
 
 + **print(text)**
-<br>Print the text to the output window. No return value.
+
+Print the text to the output window. No return value.
 
 + **send(text)**
-<br>Send the text to the game. No return value.
+
+Send the text to the game. No return value.
 
 
 # Alias Scripts #
