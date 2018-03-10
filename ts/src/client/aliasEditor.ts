@@ -10,7 +10,8 @@ export class AliasEditor extends TrigAlEditBase {
 
     protected defaultPattern: string = null;
 
-    protected defaultValue: string = "Put the alias value here.\n"
+    protected defaultValue: string = 
+              "Put the alias value here.\n"
             + "This can be 1 or more commands, including match parameters (e.g. $1).\n\n"
             + "For non-regex aliases, use $1 in the value to represent the full argument to the command.\n"
             + "Example: Alias pattern 'blah', alias value 'say $1', "
@@ -19,7 +20,8 @@ export class AliasEditor extends TrigAlEditBase {
             + "Example: Alias pattern 'blah (\\w+)', alias value 'say $1', "
             + "then issue 'blah asadf' and 'say asadf' will be sent.";
 
-    protected defaultScript: string = "/* Put the script here.\n"
+    protected defaultScript: string = 
+              "/* Put the script here.\n"
             + "This is javascript code that will run when the trigger fires.\n"
             + "You are prevented from creating global variables.\n"
             + "Use 'var' keyword to create local variables.\n"
@@ -29,7 +31,8 @@ export class AliasEditor extends TrigAlEditBase {
             + "\n"
             + "Use the send() function to send commands to the mud. Example: send('kill orc');\n"
             + "For regex aliases, 'match' will be the javascript match array, with \n"
-            + "indices according to match groups.\n";
+            + "indices according to match groups.\n"
+            + "*/\n";
 
     protected getList() {
         let aliases = this.aliasManager.aliases;

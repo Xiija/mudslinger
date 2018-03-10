@@ -44,7 +44,7 @@ export class JsScriptWin {
 
     private handleRunButtonClick() {
         let code_text = this.codeMirror.getValue();
-        let script = this.jsScript.makeScript(code_text);
+        let script = this.jsScript.makeScript(code_text, "");
         if (script) { script(); };
     }
 

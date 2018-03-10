@@ -61,8 +61,8 @@ export class AliasManager {
                 }
 
                 if (alias.is_script) {
-                    let script = this.jsScript.makeScript(alias.value);
-                    if (script) { script.RunScript(match); };
+                    let script = this.jsScript.makeScript(alias.value, "match, input");
+                    if (script) { script(match, cmd); };
                     return true;
                 } else {
                     let value = alias.value;
@@ -80,8 +80,8 @@ export class AliasManager {
                 }
 
                 if (alias.is_script) {
-                    let script = this.jsScript.makeScript(alias.value);
-                    if (script) { script(); };
+                    let script = this.jsScript.makeScript(alias.value, "input");
+                    if (script) { script(cmd); };
                     return true;
                 } else {
                     let value = alias.value.replace("$1", match[1] || "");

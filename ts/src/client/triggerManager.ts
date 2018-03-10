@@ -56,8 +56,8 @@ export class TriggerManager {
                 }
 
                 if (trig.is_script) {
-                    let script = this.jsScript.makeScript(trig.value);
-                    if (script) { script(); };
+                    let script = this.jsScript.makeScript(trig.value, "match, line");
+                    if (script) { script(match, line); };
                 } else {
                     let value = trig.value;
 
@@ -71,8 +71,8 @@ export class TriggerManager {
             } else {
                 if (line.includes(trig.pattern)) {
                     if (trig.is_script) {
-                        let script = this.jsScript.makeScript(trig.value);
-                        if (script) { script(); };
+                        let script = this.jsScript.makeScript(trig.value, "line");
+                        if (script) { script(line); };
                     } else {
                         let cmds = trig.value.replace("\r", "").split("\n");
                         GlEvent.triggerSendCommands.fire(cmds);

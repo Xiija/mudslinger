@@ -8,14 +8,14 @@ export class TriggerEditor extends TrigAlEditBase {
         triggerManager.evtTriggersChanged.handle(this.onDataChange, this);
     }
 
-    protected defaultValue =
+    protected defaultValue: string =
          "Put the trigger value here.\n"
         + "This can be 1 or more commands, including match parameters (e.g. $1) for regex triggers.\n\n"
         + "For regex triggers, use ${groupnum} to represent the matches from your regex pattern.\n"
         + "Example: Trigger pattern '(\\w+) has arrived.', trigger value 'say Hi $1', "
         + "then if 'Vodur has arrived' comes through, 'say hi Vodur' will be sent.";
 
-    protected defaultScript =
+    protected defaultScript: string =
          "/* Put the script here.\n"
         + "This is javascript code that will run when the trigger fires.\n"
         + "You are prevented from creating global variables.\n"
@@ -26,7 +26,8 @@ export class TriggerEditor extends TrigAlEditBase {
         + "\n"
         + "Use the send() function to send commands to the mud. Example: send('kill orc');\n"
         + "For regex triggers, 'match' will be the javascript match array, with \n"
-        + "indices according to match groups.\n";
+        + "indices according to match groups.\n"
+        + "*/\n";
 
     protected defaultPattern: string = null;
 

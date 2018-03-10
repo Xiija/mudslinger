@@ -13,7 +13,7 @@ Live version at: [http://mudslinger.rooflez.com](http://mudslinger.rooflez.com)
 * MXP support (<image>, <send>, <a>, <i>, <b>, <u>, and <s> tags)
 * Triggers (basic and regex)
 * Aliases (basic and regex)
-* Scripting support (Javascript)
+* [Scripting support (Javascript)](scripting.md)
 
 
 # Getting started #
