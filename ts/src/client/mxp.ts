@@ -47,8 +47,8 @@ export class Mxp {
                 this.openTags.push("a");
                 let elem = $(tag);
                 elem.attr("target", "_blank");
-                let color = this.outputManager.getFgColor();
-                elem.css("border-bottom", "1px solid " + color);
+                elem.addClass("underline");
+
                 this.outputManager.pushMxpElem(elem);
                 return true;
             }
@@ -103,8 +103,9 @@ export class Mxp {
                     let cmd = tag_m[1];
                     let html_tag = "<a href=\"#\" title=\"" + cmd + "\">";
                     let elem = $(html_tag);
-                    let color = this.outputManager.getFgColor() || elem.css("color");
-                    elem.css("border-bottom", "1px solid " + color);
+
+                    elem.addClass("underline");
+
                     elem.click(() => {
                         GlEvent.sendCommand.fire({value: tag_m[1]});
                     });
@@ -120,8 +121,9 @@ export class Mxp {
                     this.openTags.push("send");
                     let html_tag = "<a href=\"#\">";
                     let elem = $(html_tag);
-                    let color = this.outputManager.getFgColor() || elem.css("color");
-                    elem.css("border-bottom", "1px solid " + color);
+
+                    elem.addClass("underline");
+
                     this.outputManager.pushMxpElem(elem);
                     return true;
                 }

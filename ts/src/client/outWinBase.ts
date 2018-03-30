@@ -1,6 +1,11 @@
+import { GlEvent } from "./event";
+
 import * as Util from "./util";
+import { colorIdToHtml } from "./color";
 
 export class OutWinBase {
+    private colorsEnabled: boolean = true;
+
     private lineCount: number = 0;
     private maxLines: number = 5000;
 
@@ -13,6 +18,8 @@ export class OutWinBase {
         this.pushElem($("<span>").appendTo(rootElem));
 
         this.$rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
+
+        GlEvent.setColorsEnabled.handle(this.setColorsEnabled, this);
     }
 
 
@@ -20,19 +27,36 @@ export class OutWinBase {
         this.maxLines = count;
     }
 
-    private fgColor: string;
-    private bgColor: string;
+    private setColorsEnabled(val: boolean) {
+        if (val === this.colorsEnabled) {
+            return;
+        }
 
-    public setFgColor(color: string) {
-        this.fgColor = color;
+        this.colorsEnabled = val;
+
+        for (let colorId in colorIdToHtml) {
+            let colorHtml = colorIdToHtml[colorId];
+
+            this.$rootElem.find(".fg-" + colorId).css("color", this.colorsEnabled ? colorHtml : "");
+            this.$rootElem.find(".bg-" + colorId).css("background-color", this.colorsEnabled ? colorHtml : "");
+            this.$rootElem.find(".bb-" + colorId).css("border-bottom-color", this.colorsEnabled ? colorHtml : "");
+        }
     }
 
-    public setBgColor(color: string) {
-        this.bgColor = color;
+    private fgColorId: string;
+    private bgColorId: string;
+
+    public setFgColorId(colorId: string) {
+        this.fgColorId = colorId;
+    }
+
+    public setBgColorId(colorId: string) {
+        this.bgColorId = colorId;
     };
 
     // handling nested elements, always output to last one
     private $targetElems: JQuery[];
+    private underlineNest = 0;
     protected $target: JQuery;
     private $rootElem: JQuery;
 
@@ -53,6 +77,10 @@ export class OutWinBase {
         this.$target.append(elem);
         this.$targetElems.push(elem);
         this.$target = elem;
+
+        if (elem.hasClass("underline")) {
+            this.underlineNest += 1;
+        }
     }
 
     public popElem() {
@@ -60,6 +88,11 @@ export class OutWinBase {
 
         let popped = this.$targetElems.pop();
         this.$target = this.$targetElems[this.$targetElems.length - 1];
+
+        if (popped.hasClass("underline")) {
+            this.underlineNest -= 1;
+        }
+
         return popped;
     }
 
@@ -72,22 +105,51 @@ export class OutWinBase {
     public addText(txt: string) {
         this.lineText += txt;
         let html = Util.rawToHtml(txt);
-        let span_text = "<span";
-        let style = "";
-        if (this.fgColor || this.bgColor) {
-            style = " style=\"";
-            if (this.fgColor) {
-                style += "color:" + this.fgColor + ";";
-            }
-            if (this.bgColor) {
-                style += "background-color:" + this.bgColor + ";";
-            }
-            style += "\"";
+        let spanText = "<span";
+
+        let classText = "";
+        if (this.fgColorId) {
+            classText += "fg-" + this.fgColorId + " ";
         }
-        span_text += style + ">";
-        span_text += html;
-        span_text += "</span>";
-        this.appendBuffer += span_text;
+        if (this.bgColorId) {
+            classText += "bg-" + this.bgColorId + " ";
+        }
+        if (this.underlineNest > 0) {
+            classText += "bb-" + this.fgColorId + " ";
+        }
+
+        if (classText !== "") {
+            spanText += " class=\"" + classText + "\"";
+        }
+
+        let styleText = "";
+
+        if (this.underlineNest > 0) {
+            styleText += "border-bottom-style:solid;";
+            styleText += "border-bottom-width:1px;";
+            if (this.colorsEnabled) {
+                styleText += "border-bottom-color:" + colorIdToHtml[this.fgColorId] + ";";
+            }
+        }
+
+        if (this.colorsEnabled) {
+            
+            if (this.fgColorId) {
+                styleText += "color:" + colorIdToHtml[this.fgColorId] + ";";
+            }
+            if (this.bgColorId) {
+                styleText += "background-color:" + colorIdToHtml[this.bgColorId] + ";";
+            }
+        }
+
+        if (styleText !== "") {
+            spanText += " style=\"" + styleText + "\"";
+        }
+
+        spanText += ">";
+        spanText += html;
+        spanText += "</span>";
+        this.appendBuffer += spanText;
 
         if (txt.endsWith("\n")) {
             this.$target.append(this.appendBuffer);

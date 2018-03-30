@@ -16,6 +16,7 @@ declare let configClient: any;
 
 export class MenuBar {
     private $menuBar: JQuery;
+    private $chkEnableColor: JQuery;
     private $chkEnableTrig: JQuery;
     private $chkEnableAlias: JQuery;
     private $chkEnableMap: JQuery;
@@ -35,11 +36,17 @@ export class MenuBar {
 
         this.$menuBar = $("#menuBar");
 
+        this.$chkEnableColor = $("#menuBar-chkEnableColor");
+
         this.$chkEnableTrig = $("#menuBar-chkEnableTrig");
         this.$chkEnableAlias = $("#menuBar-chkEnableAlias");
 
         (<any>this.$menuBar).jqxMenu({ width: "100%", height: "4%"});
         this.$menuBar.on("itemclick", (event: any) => { this.handleClick(event); });
+
+        this.$chkEnableColor.change(function() {
+            GlEvent.setColorsEnabled.fire(this.checked);
+        });
 
         this.$chkEnableTrig.change(function() {
             GlEvent.setTriggersEnabled.fire(this.checked);

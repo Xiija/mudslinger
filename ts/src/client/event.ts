@@ -19,6 +19,7 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
+    export const setColorsEnabled = new EventHook<boolean>();
     export const setAliasesEnabled = new EventHook<GlDef.SetAliasesEnabledData>();
     export const setTriggersEnabled = new EventHook<GlDef.SetTriggersEnabledData>();
     export const setEcho = new EventHook<GlDef.SetEchoData>();
