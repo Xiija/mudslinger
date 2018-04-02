@@ -1,2 +1,11 @@
 node_modules
 ts/build
+static/public/codemirror
+static/public/jqwidgets
+static/public/jquery.min.js
+static/public/socketio.min.js
+static/public/mudslinger.js
+static/public/configClient.js
+static/test/qunit
+static/test/mudslingerTest.js
+dist

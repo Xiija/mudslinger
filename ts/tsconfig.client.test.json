@@ -10,7 +10,6 @@
         "node_modules"
     ],
     "include": [
-        "./src/client/*",
-        "./test/client"
+        "./test/client/testMain.ts"
     ]
 }

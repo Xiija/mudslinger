@@ -3,11 +3,11 @@ export type ansiLevel = "low" | "high";
 
 export type ansiColorTuple = [ansiName, ansiLevel];
 
-export function copyAnsiColorTuple(color: ansiColorTuple): ansiColorTuple {
+function copyAnsiColorTuple(color: ansiColorTuple): ansiColorTuple {
     return [color[0], color[1]];
 }
 
-export const ansiFgLookup: {[k: number]: ansiName} = {
+const ansiFgLookup: {[k: number]: ansiName} = {
     30: "black",
     31: "red",
     32: "green",
@@ -18,7 +18,7 @@ export const ansiFgLookup: {[k: number]: ansiName} = {
     37: "white"
 };
 
-export const ansiBgLookup: {[k: number]: ansiName} = {
+const ansiBgLookup: {[k: number]: ansiName} = {
     40: "black",
     41: "red",
     42: "green",
@@ -346,3 +346,167 @@ export const colorIdToHtml: {[k: string]: string} = {
     "254": "#e4e4e4",
     "255": "#eeeeee"
 };
+
+export class ColorManager {
+    private ansiReverse = false;
+    private ansiBold = false;
+
+    private ansiFg: ansiColorTuple;
+    private ansiBg: ansiColorTuple;
+
+    private fgColorId: string = null;
+    private bgColorId: string = null;
+
+    private defaultAnsiFg: ansiColorTuple;
+    private defaultFgId: string;
+    private defaultAnsiBg: ansiColorTuple;
+    private defaultBgId: string;
+
+    constructor(
+        defaultAnsiFg: ansiColorTuple = ["green", "low"],
+        defaultAnsiBg: ansiColorTuple = ["black", "low"]
+    ) {
+        this.setDefaultAnsiFg(defaultAnsiFg);
+        this.setDefaultAnsiBg(defaultAnsiBg);
+    }
+
+    public getFgId(): string {
+        if (this.ansiReverse) {
+            return this.bgColorId || this.defaultBgId;
+        } else {
+            return this.fgColorId;
+        }
+    }
+
+    private setFgId(colorId: string) {
+        this.fgColorId = colorId;
+    }
+
+    public getBgId(): string {
+        if (this.ansiReverse) {
+            return this.fgColorId || this.defaultFgId;
+        } else {
+            return this.bgColorId;
+        }
+    }
+
+    private setBgId(colorId: string) {
+        this.bgColorId = colorId;
+    }
+
+    private setAnsiFg(color: ansiColorTuple) {
+        this.ansiFg = color;
+        if (color) {
+            this.setFgId(color[0] + "-" + color[1]);
+        } else {
+            this.setFgId(null);
+        }
+    }
+
+    private setAnsiBg(color: ansiColorTuple) {
+        this.ansiBg = color;
+        if (color) {
+            this.setBgId(color[0] + "-" + color[1]);
+        } else {
+            this.setBgId(null);
+        }
+    }
+
+    private setDefaultAnsiFg(color: ansiColorTuple) {
+        this.defaultAnsiFg = copyAnsiColorTuple(color);
+        this.defaultFgId = color[0] + "-" + color[1];
+    }
+
+    private setDefaultAnsiBg(color: ansiColorTuple) {
+        this.defaultAnsiBg = copyAnsiColorTuple(color);
+        this.defaultBgId = color[0] + "-" + color[1];
+    }
+
+    private handleXtermEscape(colorCode: number, isBg: boolean ) {
+        if (isBg) {
+            this.ansiBg = null;
+            this.setBgId(colorCode.toString());
+        } else {
+            this.ansiFg = null;
+            this.setFgId(colorCode.toString());
+        }
+    }
+
+    public handleAnsiGraphicCodes(codes: Array<string>) {
+        /* Special case XTERM 256 color format */
+        if (codes.length === 3)
+        {
+            if (codes[0] === "38" && codes[1] === "5") {
+                this.handleXtermEscape(parseInt(codes[2]), false);
+                return;
+            } else if (codes[0] === "48" && codes[1] === "5") {
+                this.handleXtermEscape(parseInt(codes[2]), true);
+                return;
+            }
+            // else it's just a regular ANSI sequence presumably
+        }
+
+        /* Standard ANSI color sequence */
+        let newFg: ansiColorTuple;
+        let newBg: ansiColorTuple;
+
+        for (let i = 0; i < codes.length; i++) {
+
+            let code = parseInt(codes[i]);
+
+            /* all off */
+            if (code === 0) {
+                newFg = null;
+                newBg = null;
+                this.ansiReverse = false;
+                this.ansiBold = false;
+                continue;
+            }
+
+            /* bold on */
+            if (code === 1) {
+                this.ansiBold = true;
+
+                // On the chance that we have xterm colors, just ignore bold
+                if (newFg || this.ansiFg || !this.fgColorId) {
+                    newFg = newFg || this.ansiFg || copyAnsiColorTuple(this.defaultAnsiFg);
+                    newFg[1] = "high";
+                }
+                continue;
+            }
+
+            /* reverse */
+            if (code === 7) {
+                /* TODO: handle xterm reversing */
+                this.ansiReverse = true;
+                continue;
+            }
+
+            /* foreground colors */
+            if (code >= 30 && code <= 37) {
+                let colorName = ansiFgLookup[code];
+                newFg = newFg || copyAnsiColorTuple(this.defaultAnsiFg);
+                newFg[0] = colorName;
+                if (this.ansiBold) {
+                    newFg[1] = "high";
+                }
+                continue;
+            }
+
+            /* background colors */
+            if (code >= 40 && code <= 47) {
+                let color_name = ansiBgLookup[code];
+                newBg = newBg || copyAnsiColorTuple(this.defaultAnsiBg);
+                newBg[0] = color_name;
+                continue;
+            }
+        }
+
+        if (newFg !== undefined) {
+            this.setAnsiFg(newFg);
+        }
+        if (newBg !== undefined) {
+            this.setAnsiBg(newBg);
+        }
+    }
+}
