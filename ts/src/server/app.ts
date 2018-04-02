@@ -117,7 +117,11 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
 });
 
 if (serverConfig.useHttpServer) {
-    app.use(express.static("static"));
+    app.use(express.static("static/public"));
+
+    if (serverConfig.clientTest) {
+        app.use('/test', express.static("static/test"));
+    }
 
     app.get("/", function(req, res) {
         res.sendFile("static/index.html", {root: cwd});

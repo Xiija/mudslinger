@@ -1,12 +1,16 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "module": "commonJs",
+        "module": "es2015",
         "outDir": "./build/build_client_test",
         "noImplicitAny": true,
         "noImplicitReturns": true
     },
+    "exclude": [
+        "node_modules"
+    ],
     "include": [
-        "./test/client/*"
+        "./src/client/*",
+        "./test/client"
     ]
 }
