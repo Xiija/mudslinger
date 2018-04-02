@@ -1,15 +1,23 @@
-import { GlEvent, GlDef } from "./event";
+import { EventHook } from "./event";
 
-import { OutputManager } from "./outputManager";
+
+export interface IMxpOutput {
+    pushElem(elem: HTMLElement): void;
+    popElem(): HTMLElement;
+    sendCommand(value: string, noPrint?: boolean): void;
+};
+
 
 export class Mxp {
+    private outputIf: IMxpOutput;
+
     private openTags: Array<string> = [];
     private tagHandlers: Array<(tag: string) => void> = [];
 
-    constructor(private outputManager: OutputManager) {
-        this.makeTagHandlers();
+    constructor(outputIf: IMxpOutput) {
+        this.outputIf = outputIf;
 
-        GlEvent.mxpTag.handle(this.handleMxpTag, this);
+        this.makeTagHandlers();
     }
 
     private makeTagHandlers() {
@@ -17,9 +25,9 @@ export class Mxp {
             let re = /^<version>$/i;
             let match = re.exec(tag);
             if (match) {
-                GlEvent.sendCommand.fire({
-                    value: "\x1b[1z<VERSION CLIENT=Mudslinger MXP=0.01>", // using closing line tag makes it print twice...
-                    noPrint: true});
+                this.outputIf.sendCommand(
+                    "\x1b[1z<VERSION CLIENT=Mudslinger MXP=0.01>", // using closing line tag makes it print twice...
+                    true);
                 return true;
             }
             return false;
@@ -31,9 +39,10 @@ export class Mxp {
             let match = re.exec(tag);
             if (match) {
                 /* push and pop is dirty way to do this, clean it up later */
-                let elem = $("<img src=\"" + match[2] + match[1] + "\">");
-                this.outputManager.pushMxpElem(elem);
-                this.outputManager.popMxpElem();
+                let elem: HTMLImageElement = document.createElement("img");
+                elem.src = match[2] + match[1];
+                this.outputIf.pushElem(elem);
+                this.outputIf.popElem();
                 return true;
             }
 
@@ -49,7 +58,7 @@ export class Mxp {
                 elem.attr("target", "_blank");
                 elem.addClass("underline");
 
-                this.outputManager.pushMxpElem(elem);
+                this.outputIf.pushElem(elem[0]);
                 return true;
             }
 
@@ -61,7 +70,7 @@ export class Mxp {
                     console.log("Got closing a tag with no opening tag.");
                 } else {
                     this.openTags.pop();
-                    this.outputManager.popMxpElem();
+                    this.outputIf.popElem();
                 }
                 return true;
             }
@@ -69,29 +78,81 @@ export class Mxp {
             return false;
         });
         this.tagHandlers.push((tag) => {
-            let re = /^<([bius])>/i;
+            let re = /^<([bi])>/i;
             let match = re.exec(tag);
             if (match) {
                 this.openTags.push(match[1]);
                 let elem = $(tag);
-                this.outputManager.pushMxpElem(elem);
+                this.outputIf.pushElem(elem[0]);
                 return true;
             }
 
-            re = /^<\/([bius])>/i;
+            re = /^<\/([bi])>/i;
             match = re.exec(tag);
             if (match) {
                 if (this.openTags[this.openTags.length - 1] !== match[1]) {
                     console.log("Got closing " + match[1] + " tag with no opening tag.");
                 } else {
                     this.openTags.pop();
-                    this.outputManager.popMxpElem();
+                    this.outputIf.popElem();
                 }
                 return true;
             }
 
             return false;
         });
+        this.tagHandlers.push((tag) => {
+            let re = /^<s>/i;
+            let match = re.exec(tag);
+            if (match) {
+                this.openTags.push("s");
+                let elem: HTMLSpanElement = document.createElement("span");
+                elem.style.textDecoration = "line-through";
+                this.outputIf.pushElem(elem);
+                return true;
+            }
+
+            re = /^<\/s>/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== "s") {
+                    console.log("Got closing s tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    this.outputIf.popElem();
+                }
+                return true;
+            }
+
+            return false;
+        });
+
+        this.tagHandlers.push((tag) => {
+            let re = /^<u>/i;
+            let match = re.exec(tag);
+            if (match) {
+                this.openTags.push("u");
+                let elem: HTMLSpanElement = document.createElement("span");
+                elem.className = "underline";
+                this.outputIf.pushElem(elem);
+                return true;
+            }
+
+            re = /^<\/u>/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== "u") {
+                    console.log("Got closing u tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    this.outputIf.popElem();
+                }
+                return true;
+            }
+
+            return false;
+        });
+
         this.tagHandlers.push((tag) => {
             let re = /^<send/i;
             let match = re.exec(tag);
@@ -101,16 +162,15 @@ export class Mxp {
                 let tag_m = tag_re.exec(tag);
                 if (tag_m) {
                     let cmd = tag_m[1];
-                    let html_tag = "<a href=\"#\" title=\"" + cmd + "\">";
-                    let elem = $(html_tag);
-
-                    elem.addClass("underline");
-
-                    elem.click(() => {
-                        GlEvent.sendCommand.fire({value: tag_m[1]});
+                    let elem: HTMLAnchorElement = document.createElement("a");
+                    elem.href = "#";
+                    elem.title = cmd;
+                    elem.className = "underline";
+                    elem.addEventListener("click", () => {
+                        this.outputIf.sendCommand(tag_m[1]);
                     });
                     this.openTags.push("send");
-                    this.outputManager.pushMxpElem(elem);
+                    this.outputIf.pushElem(elem);
                     return true;
                 }
 
@@ -119,12 +179,11 @@ export class Mxp {
                 tag_m = tag_re.exec(tag);
                 if (tag_m) {
                     this.openTags.push("send");
-                    let html_tag = "<a href=\"#\">";
-                    let elem = $(html_tag);
+                    let elem = document.createElement("a") as HTMLAnchorElement;
+                    elem.href = "#";
+                    elem.className = "underline";
 
-                    elem.addClass("underline");
-
-                    this.outputManager.pushMxpElem(elem);
+                    this.outputIf.pushElem(elem);
                     return true;
                 }
             }
@@ -136,13 +195,13 @@ export class Mxp {
                     console.log("Got closing send tag with no opening tag.");
                 } else {
                     this.openTags.pop();
-                    let elem = this.outputManager.popMxpElem();
-                    if (!elem[0].hasAttribute("title")) {
-                        /* didn"t have explicit href so we need to do it here */
-                        let txt = elem.text();
-                        elem[0].setAttribute("title", txt);
-                        elem.click(() => {
-                            GlEvent.sendCommand.fire({value: txt});
+                    let elem = this.outputIf.popElem() as HTMLAnchorElement;
+                    if (!elem.hasAttribute("title")) {
+                        /* didn't have explicit href so we need to do it here */
+                        let txt = elem.innerText;
+                        elem.title = txt;
+                        elem.addEventListener("click", () => {
+                            this.outputIf.sendCommand(txt);
                         });
                     }
                 }
@@ -153,7 +212,7 @@ export class Mxp {
         });
     }
 
-    private handleMxpTag(data: GlDef.MxpTagData) {
+    public handleMxpTag(data: string) {
         let handled = false;
         for (let i = 0; i < this.tagHandlers.length; i++) {
             /* tag handlers will return true if it"s a match */
@@ -175,7 +234,7 @@ export class Mxp {
         }
 
         for (let i = this.openTags.length - 1; i >= 0; i--) {
-                this.outputManager.popMxpElem();
+            this.outputIf.popElem();
         }
         this.openTags = [];
     };
