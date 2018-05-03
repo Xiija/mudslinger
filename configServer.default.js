@@ -16,5 +16,8 @@ If hardcoding a target, be sure to also set hardcodedTarget to true in configCli
 config.targetHost = null; 
 config.targetPort = null;
 
+/* whether to serve client test files */
+config.clientTest = false;
+
 
 module.exports = config;
