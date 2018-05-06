@@ -209,6 +209,18 @@ export class Socket {
             let re;
             let match;
 
+            /* ansi default, equivalent to [0m */
+            re = /^\x1b\[m/;
+            match = re.exec(substr);
+            if (match) {
+                this.outputManager.handleText(output);
+                output = "";
+
+                i += match[0].length;
+                this.outputManager.handleAnsiGraphicCodes(["0"]);
+                continue;
+            }
+
             /* ansi escapes (including 256 color) */
             re = /^\x1b\[([0-9]+(?:;[0-9]+)*)m/;
             match = re.exec(substr);

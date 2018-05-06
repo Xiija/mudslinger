@@ -214,6 +214,28 @@ export class OutputManager {
                 new_bg[0] = color_name;
                 continue;
             }
+
+            /* Default foreground color */
+            if (code === 39) {
+                new_fg = null;
+                continue;
+            }
+
+            /* Normal color or intensity */
+            if (code === 22) {
+                this.ansiBold = false;
+                if (!new_fg) {
+                    if (this.ansiFg) {
+                        new_fg = copyAnsiColorTuple(this.ansiFg);
+                    } else {
+                        new_fg = copyAnsiColorTuple(this.defaultAnsiFg);
+                    }
+                }
+                new_fg[1] = "low";
+                continue;
+            }
+
+            console.log("Unsupported ANSI code:", code);
         }
 
         if (new_fg !== undefined) {
