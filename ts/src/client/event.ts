@@ -19,6 +19,7 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
+    export const setUtf8Enabled = new EventHook<boolean>();
     export const setColorsEnabled = new EventHook<boolean>();
     export const setAliasesEnabled = new EventHook<GlDef.SetAliasesEnabledData>();
     export const setTriggersEnabled = new EventHook<GlDef.SetTriggersEnabledData>();
@@ -45,8 +46,6 @@ export namespace GlEvent {
 }
 
 export namespace GlDef {
-    export type LoadLayoutData = void;
-    export type PrepareReloadLayoutData = void;
     export type TelnetConnectData = void;
     export type TelnetDisconnectData = void;
     export type WsErrorData = void;

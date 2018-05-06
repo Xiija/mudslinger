@@ -1,15 +1,7 @@
+/// <reference path="../../definitions/polyfill.d.ts" />
+
+import * as testUtf8 from "./testUtf8";
+
 export namespace test {
-
-QUnit.test("test1", (assert: Assert) => {
-    assert.ok( false, "text1");
-});
-
-QUnit.test("test2", (assert: Assert) => {
-    assert.ok( false, "text2");
-});
-
-QUnit.test("test3", (assert: Assert) => {
-    assert.ok(true, "text3");
-});
-
+    testUtf8.test();
 } // namespace test

@@ -5,6 +5,8 @@ import { Mxp } from "./mxp";
 import { OutputManager } from "./outputManager";
 import { IoEvent } from "../shared/ioevent";
 import { TelnetClient } from "./telnetClient";
+import { utf8decode } from "./util";
+import { UserConfig } from "./userConfig";
 
 
 declare let configClient: any;
@@ -15,6 +17,7 @@ export class Socket {
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
     private clientIp: string;
+    private utf8Enabled: boolean;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
         GlEvent.sendCommand.handle(this.handleSendCommand, this);
@@ -22,6 +25,10 @@ export class Socket {
         GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
         GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
+
+        this.utf8Enabled = UserConfig.get("utf8Enabled");
+
+        GlEvent.setUtf8Enabled.handle((val) => { this.utf8Enabled = val; }, this);
     }
 
     public open() {
@@ -130,6 +137,8 @@ export class Socket {
         }
     };
 
+
+    private partialUtf8: Uint8Array;
     private partialSeq: string;
     private handleTelnetData(data: ArrayBuffer) {
         // console.timeEnd("command_resp");
@@ -137,7 +146,24 @@ export class Socket {
 
         let rx = this.partialSeq || "";
         this.partialSeq = null;
-        rx += String.fromCharCode.apply(String, new Uint8Array(data));
+
+        if (this.utf8Enabled) {
+            let utf8Data: Uint8Array;
+            if (this.partialUtf8) {
+                utf8Data = new Uint8Array(data.byteLength + this.partialUtf8.length);
+                utf8Data.set(this.partialUtf8, 0);
+                utf8Data.set(new Uint8Array(data), this.partialUtf8.length);
+                this.partialUtf8 = null;
+            } else {
+                utf8Data = new Uint8Array(data);
+            }
+
+            let result = utf8decode(utf8Data);
+            this.partialUtf8 = result.partial;
+            rx += result.result;
+        } else {
+            rx += String.fromCharCode.apply(String, new Uint8Array(data));
+        }
 
         let output = "";
         let rx_len = rx.length;

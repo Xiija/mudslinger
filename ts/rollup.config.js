@@ -1,8 +1,10 @@
 /* Should run from package root, so paths accordingly */
 export default {
-    entry: 'ts/build/build_client/client/client.js',
-    format: 'umd',
-    dest: 'static/public/mudslinger.js',
-    moduleName: 'Mudslinger',
-    sourceMap: 'inline'
+    input: 'ts/build/build_client/client/client.js',
+    output: {
+        format: 'umd',
+        file: 'static/public/mudslinger.js',
+        name: 'Mudslinger',
+        sourcemap: 'inline'
+    }
 };

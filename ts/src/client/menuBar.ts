@@ -17,6 +17,7 @@ declare let configClient: any;
 export class MenuBar {
     private $menuBar: JQuery;
     private $chkEnableColor: JQuery;
+    private $chkEnableUtf8: JQuery;
     private $chkEnableTrig: JQuery;
     private $chkEnableAlias: JQuery;
     private $chkEnableMap: JQuery;
@@ -37,6 +38,7 @@ export class MenuBar {
         this.$menuBar = $("#menuBar");
 
         this.$chkEnableColor = $("#menuBar-chkEnableColor");
+        this.$chkEnableUtf8 = $("#menuBar-chkEnableUtf8");
 
         this.$chkEnableTrig = $("#menuBar-chkEnableTrig");
         this.$chkEnableAlias = $("#menuBar-chkEnableAlias");
@@ -47,6 +49,13 @@ export class MenuBar {
         this.$chkEnableColor.change(function() {
             GlEvent.setColorsEnabled.fire(this.checked);
         });
+
+        this.$chkEnableUtf8.change(function() {
+            UserConfig.set("utf8Enabled", this.checked);
+            GlEvent.setUtf8Enabled.fire(this.checked);
+        });
+
+        (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.get("utf8Enabled");
 
         this.$chkEnableTrig.change(function() {
             GlEvent.setTriggersEnabled.fire(this.checked);
