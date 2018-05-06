@@ -5,7 +5,7 @@ import { Mxp } from "./mxp";
 import { OutputManager } from "./outputManager";
 import { IoEvent } from "../shared/ioevent";
 import { TelnetClient } from "./telnetClient";
-import { utf8decode } from "./util";
+import { utf8decode, utf8encode } from "./util";
 import { UserConfig } from "./userConfig";
 
 
@@ -110,10 +110,16 @@ export class Socket {
 
     private sendCmd(cmd: string) {
         cmd += "\r\n";
-        let arr = new Uint8Array(cmd.length);
-        for (let i = 0; i < cmd.length; i++) {
-            arr[i] = cmd.charCodeAt(i);
+        let arr: Uint8Array;
+        if (this.utf8Enabled) {
+            arr = utf8encode(cmd);
+        } else {
+            arr = new Uint8Array(cmd.length);
+            for (let i = 0; i < cmd.length; i++) {
+                arr[i] = cmd.charCodeAt(i);
+            }
         }
+        
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
 

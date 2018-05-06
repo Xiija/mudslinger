@@ -1,8 +1,8 @@
-import { utf8decode } from "../../src/client/util";
+import { utf8decode, utf8encode } from "../../src/client/util";
 
 export function test() {
 
-QUnit.module("utf8");
+QUnit.module("utf8 decode");
 
 QUnit.test("ascii", (assert: Assert) => {
     let expected = "";
@@ -81,6 +81,59 @@ QUnit.test("partial 1", (assert: Assert) => {
     let o = utf8decode(new Uint8Array(arr));
     assert.strictEqual(o.result, expected);
     assert.deepEqual(o.partial, new Uint8Array(arr));
+});
+
+QUnit.module("utf8 encode");
+
+QUnit.test("ascii", (assert: Assert) => {
+    let str = "";
+    let expected = [];
+
+    for (let i = 0; i < 128; ++i) {
+        expected.push(i);
+        str += String.fromCharCode(i);
+    }
+
+    let result = utf8encode(str);
+    assert.deepEqual(new Uint8Array(expected), result);
+});
+
+QUnit.test("2 byte", (assert: Assert) => {
+    let str = "¡¢£¤ÿ";
+    let expected = [
+        0xc2, 0xa1, // ¡
+        0xc2, 0xa2, // ¢
+        0xc2, 0xa3, // £
+        0xc2, 0xa4, // ¤
+        0xc3, 0xbf, // ÿ
+    ];
+
+    let result = utf8encode(str);
+    assert.deepEqual(new Uint8Array(expected), result);
+});
+
+QUnit.test("3 byte", (assert: Assert) => {
+    let str = "ࢢࢬऄ";
+    let expected = [
+        0xe0, 0xa2, 0xa2, // ࢢ
+        0xe0, 0xa2, 0xac, // ࢬ
+        0xe0, 0xa4, 0x84, // ऄ
+    ];
+
+    let result = utf8encode(str);
+    assert.deepEqual(new Uint8Array(expected), result);
+});
+
+QUnit.test("4 byte", (assert: Assert) => {
+    let str = "𐌰𐌸𐍊";
+    let expected = [
+        0xf0, 0x90, 0x8c, 0xb0, // 𐌰
+        0xf0, 0x90, 0x8c, 0xb8, // 𐌸
+        0xf0, 0x90, 0x8d, 0x8a, // 𐍊
+    ];
+
+    let result = utf8encode(str);
+    assert.deepEqual(new Uint8Array(expected), result);
 });
 
 };
