@@ -120,12 +120,10 @@ if (serverConfig.useHttpServer) {
     app.use(express.static("static/public"));
 
     if (serverConfig.clientTest) {
-        app.use('/test', express.static("static/test"));
+        app.use('/test', express.static("static/test", {
+            index: "test.html"
+        }));
     }
-
-    app.get("/", function(req, res) {
-        res.sendFile("static/index.html", {root: cwd});
-    });
 
     app.use((err: any, req: any, res: any, next: any) => {
         tlog("App error: " +
