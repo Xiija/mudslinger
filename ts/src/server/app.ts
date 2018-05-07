@@ -2,6 +2,8 @@ import * as express from "express";
 import * as http from "http";
 import * as socketio from "socket.io";
 import * as net from "net";
+import * as fs from "fs";
+import * as readline from "readline";
 
 import { IoEvent } from "../shared/ioevent";
 
@@ -15,6 +17,15 @@ let server: http.Server;
 let io: SocketIO.Server;
 
 let telnetIdNext: number = 0;
+
+interface connInfo {
+    telnetId: number;
+    userIp: string;
+    host: string;
+    port: number;
+};
+
+let openConns: {[k: number]: connInfo} = {};
 
 if (serverConfig.useHttpServer === true) {
     app = express();
@@ -71,10 +82,18 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
             port = args[1];
         }
 
+        openConns[telnetId] = {
+            telnetId: telnetId,
+            userIp: client.request.connection.remoteAddress,
+            host: host,
+            port: port,
+        };
+
         telnet.on("data", (data: Buffer) => {
             ioEvt.srvTelnetData.fire(data.buffer);
         });
         telnet.on("close", (had_error: boolean) => {
+            delete openConns[telnetId];
             ioEvt.srvTelnetClosed.fire(had_error);
             telnet = null;
             let elapsed: number = <any>(new Date()) - <any>conStartTime;
@@ -97,6 +116,7 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
             });
         }
         catch (err) {
+            delete openConns[telnetId];
             tlog(telnetId, "::", "ERROR CONNECTING TELNET:", err);
             ioEvt.srvTelnetError.fire(err.message);
         }
@@ -145,3 +165,70 @@ if (serverConfig.useHttpServer) {
 function tlog(...args: any[]) {
     console.log("[[", new Date().toLocaleString(), "]]", ...args);
 }
+
+const ADMIN_SOCK_PATH = "admin_if.sock";
+
+if (fs.existsSync(ADMIN_SOCK_PATH)) {
+    fs.unlinkSync(ADMIN_SOCK_PATH);
+}
+
+
+type adminFunc = (sock: net.Socket, args: string[]) => void;
+
+
+let adminFuncs: {[k: string]: adminFunc} =  {};
+adminFuncs["help"] = (sock: net.Socket, args: string[]) => {
+    sock.write("Available commands:\n\n");
+    for (let cmd in adminFuncs) {
+        sock.write(cmd + "\n");
+    }
+};
+
+adminFuncs["ls"] = (sock: net.Socket, args: string[]) => {
+    sock.write("Open connections:\n\n");
+    for (let tnId in openConns) {
+        let o = openConns[tnId];
+        sock.write( o.telnetId.toString() + 
+                    ": " + o.userIp  +
+                    " => " + o.host + "," + o.port.toString() +
+                    "\n");
+    }
+};
+
+let adminServer = net.createServer((socket: net.Socket) => {
+    console.log("{{admin connection opened}}");
+
+    let rl = readline.createInterface({
+        input: socket
+    });
+
+    rl.on("line", (line: string) => {
+        let words = line.split(" ");
+
+        if (words.length > 0) {
+            let afunc = adminFuncs[words[0]];
+
+            if (!afunc) {
+                socket.write("No such command. Try 'help'.\n");
+            } else {
+                try {
+                    afunc(socket, words.slice(1));
+                }
+                catch (err) {
+                    console.log("{{admin error '" + line + "':", err, "}}");
+                    socket.write("COMMAND ERROR\n");
+                }
+            }
+        }
+
+        socket.write("admin> ");
+    });
+
+    socket.on("close", () => {
+        console.log("{{admin closed}}");
+    });
+
+    socket.write("admin> ");
+});
+
+adminServer.listen(ADMIN_SOCK_PATH);
