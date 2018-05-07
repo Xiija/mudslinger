@@ -7,9 +7,12 @@ It can be configured to connect only to a specific host/port or allow connection
 
 Live version at: [http://mudslinger.rooflez.com](http://mudslinger.rooflez.com)
 
+Host and port can also be passed as URL parameters, e.g. [http://mudslinger.rooflez.com/?host=aarchonmud.com&port=7000](http://mudslinger.rooflez.com/?host=aarchonmud.com&port=7000)
+
 # Features #
 * ANSI color
 * XTERM 256 colors
+* UTF-8
 * MXP support (<image>, <send>, <a>, <i>, <b>, <u>, and <s> tags)
 * Triggers (basic and regex)
 * Aliases (basic and regex)
