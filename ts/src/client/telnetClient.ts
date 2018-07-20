@@ -29,6 +29,7 @@ export class TelnetClient extends Telnet {
         if (cmd === Cmd.WILL) {
             if (opt === Opt.ECHO) {
                 this.EvtServerEcho.fire(true);
+                this.writeArr([Cmd.IAC, Cmd.DO, Opt.ECHO]);
             } else if (opt === Opt.SGA) {
                 this.writeArr([Cmd.IAC, Cmd.DO, Opt.SGA]);
             } else {
@@ -37,6 +38,7 @@ export class TelnetClient extends Telnet {
         } else if (cmd === Cmd.WONT) {
             if (opt === Opt.ECHO) {
                 this.EvtServerEcho.fire(false);
+                this.writeArr([Cmd.IAC, Cmd.DONT, Opt.ECHO]);
             }
         } else if (cmd === Cmd.DO) {
             if (opt === Opt.TTYPE) {
