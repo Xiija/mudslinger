@@ -33,7 +33,7 @@ export class Socket {
 
     public open() {
         this.ioConn = io.connect(
-            "http://" +
+            location.protocol + "//" +
             (configClient.socketIoHost || document.domain) +
             ":" +
             (configClient.socketIoPort || location.port) +
