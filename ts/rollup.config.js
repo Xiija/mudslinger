@@ -6,5 +6,6 @@ export default {
         file: 'static/public/mudslinger.js',
         name: 'Mudslinger',
         sourcemap: 'inline'
-    }
+    },
+    treeshake: false
 };
