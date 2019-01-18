@@ -241,6 +241,7 @@ export abstract class TrigAlEditBase {
         this.updateListBox();
 
         (<any>this.$win).jqxWindow("open");
+        (<any>this.$win).jqxWindow("bringToFront");
     }
 
     /* To be called if underlying data changes outside of this class logic (config import, for example) */

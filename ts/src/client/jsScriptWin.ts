@@ -50,5 +50,6 @@ export class JsScriptWin {
 
     public show() {
         (<any>this.$win).jqxWindow("open");
+        (<any>this.$win).jqxWindow("bringToFront");
     }
 }
