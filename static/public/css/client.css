@@ -11,8 +11,9 @@ a:link, a:visited {
 }
 
 #mudslinger {
-    width:95vw;
-    height:92vh;
+    width: 100vw;
+    max-width: 100%;
+    height: 92vh;
 }
 
 #mainWin {
