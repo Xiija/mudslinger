@@ -264,7 +264,7 @@ export class Socket {
                 bound_ind = esc_ind;
             }
             if (nl_ind !== -1) {
-                bound_ind = (bound_ind === null) ? nl_ind : Math.min(bound_ind, nl_ind);
+                bound_ind = (bound_ind === null) ? (nl_ind - 1) : Math.min(bound_ind, nl_ind - 1);
             }
 
             if (bound_ind !== null) {
@@ -272,6 +272,7 @@ export class Socket {
                 i += bad_stuff.length;
                 console.log("Malformed sequence or tag");
                 console.log(bad_stuff);
+                // this.outputManager.handleText("{" + bad_stuff + "}");
                 continue;
             }
 
