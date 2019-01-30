@@ -25,11 +25,11 @@
     "jqwidgets-framework": "^4.6.0",
     "qunit": "^2.6.0",
     "rimraf": "^2.5.4",
-    "rollup": "^0.58.2",
+    "rollup": "^1.1.2",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
     "tslint": "^4.4.2",
-    "typescript": "^2.8.3"
+    "typescript": "^3.2.4"
   },
   "dependencies": {
     "express": "^4.14.0"

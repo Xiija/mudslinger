@@ -4,7 +4,7 @@ import { OutputManager } from "./outputManager";
 
 export class Mxp {
     private openTags: Array<string> = [];
-    private tagHandlers: Array<(tag: string) => void> = [];
+    private tagHandlers: Array<(tag: string) => boolean> = [];
 
     constructor(private outputManager: OutputManager) {
         this.makeTagHandlers();
