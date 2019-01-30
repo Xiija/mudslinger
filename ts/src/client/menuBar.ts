@@ -46,19 +46,18 @@ export class MenuBar {
         this.$menuBar.on("itemclick", (event: any) => { this.handleClick(event); });
 
         this.$chkEnableColor.change(function() {
-            GlEvent.setColorsEnabled.fire(this.checked);
+            UserConfig.set("colorsEnabled", this.checked);
         });
+        (this.$chkEnableColor[0] as HTMLInputElement).checked = UserConfig.getDef("colorsEnabled", true);
 
         this.$chkEnableUtf8.change(function() {
             UserConfig.set("utf8Enabled", this.checked);
         });
-
         (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.getDef("utf8Enabled", false);
 
         this.$chkEnableMxp.change(function() {
             UserConfig.set("mxpEnabled", this.checked);
         });
-
         (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);;
 
         this.$chkEnableTrig.change(function() {

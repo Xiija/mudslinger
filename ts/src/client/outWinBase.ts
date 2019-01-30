@@ -2,9 +2,10 @@ import { GlEvent } from "./event";
 
 import * as Util from "./util";
 import { colorIdToHtml } from "./color";
+import { UserConfig } from "./userConfig";
 
 export class OutWinBase {
-    private colorsEnabled: boolean = true;
+    private colorsEnabled: boolean;
 
     private lineCount: number = 0;
     private maxLines: number = 5000;
@@ -19,7 +20,8 @@ export class OutWinBase {
 
         this.$rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
 
-        GlEvent.setColorsEnabled.handle(this.setColorsEnabled, this);
+        this.colorsEnabled = UserConfig.getDef("colorsEnabled", true);
+        UserConfig.onSet("colorsEnabled", (val: any) => { this.setColorsEnabled(val); });
     }
 
 

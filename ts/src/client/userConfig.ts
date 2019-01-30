@@ -5,6 +5,7 @@ export namespace UserConfig {
     export const evtConfigImport = new EventHook<{[k: string]: any}>();
 
     let cfgVals: {[k: string]: any};
+    let setHandlers: {[k: string]: EventHook<any>} = {};
 
     {
         let userConfigStr = localStorage.getItem("userConfig");
@@ -14,6 +15,13 @@ export namespace UserConfig {
         } else {
             cfgVals = {};
         }
+    }
+
+    export function onSet(key: string, cb: (val: any) => void) {
+        if (key in setHandlers === false) {
+            setHandlers[key] = new EventHook<any>();
+        }
+        setHandlers[key].handle(cb);
     }
 
     export function getDef(key: string, def: any): any {
@@ -28,6 +36,9 @@ export namespace UserConfig {
     export function set(key: string, val: any) {
         cfgVals[key] = val;
         saveConfig();
+        if (key in setHandlers) {
+            setHandlers[key].fire(val);
+        }
     }
 
     function saveConfig() {
