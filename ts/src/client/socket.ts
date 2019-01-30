@@ -14,6 +14,7 @@ declare let configClient: any;
 
 export class Socket {
     public EvtServerEcho = new EventHook<boolean>();
+    public EvtTelnetConnect = new EventHook<void>();
 
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
@@ -64,7 +65,7 @@ export class Socket {
                 this.EvtServerEcho.fire(data);
             });
 
-            GlEvent.telnetConnect.fire(null);
+            this.EvtTelnetConnect.fire(null);
         });
 
         this.ioEvt.srvTelnetClosed.handle(() => {

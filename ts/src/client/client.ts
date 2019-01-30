@@ -64,9 +64,16 @@ export class Client {
         this.connectWin = new ConnectWin(this.socket);
         this.menuBar = new MenuBar(this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
 
+        // Socket events
         this.socket.EvtServerEcho.handle((val: boolean) => {
             // Server echo ON means we should have local echo OFF
             this.commandInput.setEcho(!val);
+        });
+
+        this.socket.EvtTelnetConnect.handle(() => {
+            this.commandInput.handleTelnetConnect();
+            this.menuBar.handleTelnetConnect();
+            this.outputWin.handleTelnetConnect();
         });
 
         // Prevent navigating away accidentally

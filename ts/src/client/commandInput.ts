@@ -22,8 +22,6 @@ export class CommandInput {
         this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });
         this.$cmdInputPw.keydown((event: KeyboardEvent) => { return this.pwKeydown(event); });
 
-        GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
-
         $(document).ready(() => {
             this.loadHistory();
             this.inputChange(); // Force a resize
@@ -57,7 +55,7 @@ export class CommandInput {
         }
     }
 
-    private handleTelnetConnect(): void {
+    handleTelnetConnect(): void {
         this.setEcho(true);
     }
 
