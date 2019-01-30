@@ -19,7 +19,6 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
-    export const telnetDisconnect = new EventHook<GlDef.TelnetDisconnectData>();
     export const telnetError = new EventHook<GlDef.TelnetErrorData>();
     export const sendCommand = new EventHook<GlDef.SendCommandData>();
     export const aliasSendCommands = new EventHook<GlDef.AliasSendCommandsData>();

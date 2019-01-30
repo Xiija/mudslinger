@@ -76,6 +76,11 @@ export class Client {
             this.outputWin.handleTelnetConnect();
         });
 
+        this.socket.EvtTelnetDisconnect.handle(() => {
+            this.menuBar.handleTelnetDisconnect();
+            this.outputWin.handleTelnetDisconnect();
+        });
+
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
             return "";

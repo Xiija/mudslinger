@@ -8,7 +8,6 @@ export class OutputWin extends OutWinBase {
     constructor(private triggerManager: TriggerManager) {
         super($("#winOutput"));
 
-        GlEvent.telnetDisconnect.handle(this.handleTelnetDisconnect, this);
         GlEvent.telnetError.handle(this.handleTelnetError, this);
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
@@ -117,7 +116,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleTelnetDisconnect() {
+    handleTelnetDisconnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Telnet disconnected]]"

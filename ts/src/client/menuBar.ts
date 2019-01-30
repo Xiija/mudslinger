@@ -70,10 +70,6 @@ export class MenuBar {
         });
         (this.$chkEnableAlias[0] as HTMLInputElement).checked = UserConfig.getDef("aliasesEnabled", true);
 
-        GlEvent.telnetDisconnect.handle(() => {
-            $("#menuBar-conn-disconn").text("Connect");
-        });
-
         GlEvent.wsDisconnect.handle(() => {
             $("#menuBar-conn-disconn").text("Connect");
         });
@@ -158,5 +154,9 @@ export class MenuBar {
 
     handleTelnetConnect() {
         $("#menuBar-conn-disconn").text("Disconnect");
+    }
+
+    handleTelnetDisconnect() {
+        $("#menuBar-conn-disconn").text("Connect");
     }
 }
