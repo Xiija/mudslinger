@@ -58,15 +58,16 @@ export class MenuBar {
         this.$chkEnableMxp.change(function() {
             UserConfig.set("mxpEnabled", this.checked);
         });
-        (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);;
+        (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);
 
         this.$chkEnableTrig.change(function() {
             GlEvent.setTriggersEnabled.fire(this.checked);
         });
 
         this.$chkEnableAlias.change(function() {
-            GlEvent.setAliasesEnabled.fire(this.checked);
+            UserConfig.set("aliasesEnabled", this.checked);
         });
+        (this.$chkEnableAlias[0] as HTMLInputElement).checked = UserConfig.getDef("aliasesEnabled", true);
 
         GlEvent.telnetConnect.handle(() => {
             $("#menuBar-conn-disconn").text("Disconnect");

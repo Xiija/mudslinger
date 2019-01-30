@@ -9,7 +9,6 @@ import { TrigAlItem } from "./trigAlEditBase";
 export class AliasManager {
     public evtAliasesChanged = new EventHook<void>();
 
-    private enabled: boolean = true;
     public aliases: Array<TrigAlItem> = null;
 
     constructor(private jsScript: JsScript) {
@@ -22,7 +21,6 @@ export class AliasManager {
 
         this.loadAliases();
 
-        GlEvent.setAliasesEnabled.handle(this.handleSetAliasesEnabled, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -40,15 +38,11 @@ export class AliasManager {
         this.evtAliasesChanged.fire(null);
     }
 
-    private handleSetAliasesEnabled(value: boolean) {
-        this.enabled = value;
-    }
-
     // return the result of the alias if any (string with embedded lines)
     // return true if matched and script ran
     // return null if no match
     public checkAlias(cmd: string): boolean | string {
-        if (!this.enabled) return null;
+        if (UserConfig.getDef("aliasesEnabled", true) !== true) return null;
 
         for (let i = 0; i < this.aliases.length; i++) {
             let alias = this.aliases[i];
