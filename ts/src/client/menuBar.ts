@@ -61,8 +61,9 @@ export class MenuBar {
         (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);
 
         this.$chkEnableTrig.change(function() {
-            GlEvent.setTriggersEnabled.fire(this.checked);
+            UserConfig.set("triggersEnabled", this.checked);
         });
+        (this.$chkEnableTrig[0] as HTMLInputElement).checked = UserConfig.getDef("triggersEnabled", true);
 
         this.$chkEnableAlias.change(function() {
             UserConfig.set("aliasesEnabled", this.checked);

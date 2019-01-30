@@ -9,7 +9,6 @@ import { TrigAlItem } from "./trigAlEditBase";
 export class TriggerManager {
     public evtTriggersChanged = new EventHook<void>();
 
-    private enabled: boolean = true;
     public triggers: Array<TrigAlItem> = null;
 
     constructor(private jsScript: JsScript) {
@@ -22,7 +21,6 @@ export class TriggerManager {
 
         this.loadTriggers();
 
-        GlEvent.setTriggersEnabled.handle(this.handleSetTriggersEnabled, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -40,12 +38,8 @@ export class TriggerManager {
         this.evtTriggersChanged.fire(null);
     }
 
-    private handleSetTriggersEnabled(data: GlDef.SetTriggersEnabledData) {
-        this.enabled = data;
-    }
-
     public handleLine(line: string) {
-        if (!this.enabled) return;
+        if (UserConfig.getDef("triggersEnabled", true) !== true) return;
 //        console.log("TRIGGER: " + line);
         for (let i = 0; i < this.triggers.length; i++) {
             let trig = this.triggers[i];
