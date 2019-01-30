@@ -166,69 +166,71 @@ function tlog(...args: any[]) {
     console.log("[[", new Date().toLocaleString(), "]]", ...args);
 }
 
-const ADMIN_SOCK_PATH = "admin_if.sock";
+if (process.platform !== "win32") {
+    const ADMIN_SOCK_PATH = "admin_if.sock";
 
-if (fs.existsSync(ADMIN_SOCK_PATH)) {
-    fs.unlinkSync(ADMIN_SOCK_PATH);
-}
-
-
-type adminFunc = (sock: net.Socket, args: string[]) => void;
-
-
-let adminFuncs: {[k: string]: adminFunc} =  {};
-adminFuncs["help"] = (sock: net.Socket, args: string[]) => {
-    sock.write("Available commands:\n\n");
-    for (let cmd in adminFuncs) {
-        sock.write(cmd + "\n");
+    if (fs.existsSync(ADMIN_SOCK_PATH)) {
+        fs.unlinkSync(ADMIN_SOCK_PATH);
     }
-};
 
-adminFuncs["ls"] = (sock: net.Socket, args: string[]) => {
-    sock.write("Open connections:\n\n");
-    for (let tnId in openConns) {
-        let o = openConns[tnId];
-        sock.write( o.telnetId.toString() + 
-                    ": " + o.userIp  +
-                    " => " + o.host + "," + o.port.toString() +
-                    "\n");
-    }
-};
 
-let adminServer = net.createServer((socket: net.Socket) => {
-    console.log("{{admin connection opened}}");
+    type adminFunc = (sock: net.Socket, args: string[]) => void;
 
-    let rl = readline.createInterface({
-        input: socket
-    });
 
-    rl.on("line", (line: string) => {
-        let words = line.split(" ");
+    let adminFuncs: {[k: string]: adminFunc} =  {};
+    adminFuncs["help"] = (sock: net.Socket, args: string[]) => {
+        sock.write("Available commands:\n\n");
+        for (let cmd in adminFuncs) {
+            sock.write(cmd + "\n");
+        }
+    };
 
-        if (words.length > 0) {
-            let afunc = adminFuncs[words[0]];
+    adminFuncs["ls"] = (sock: net.Socket, args: string[]) => {
+        sock.write("Open connections:\n\n");
+        for (let tnId in openConns) {
+            let o = openConns[tnId];
+            sock.write( o.telnetId.toString() + 
+                        ": " + o.userIp  +
+                        " => " + o.host + "," + o.port.toString() +
+                        "\n");
+        }
+    };
 
-            if (!afunc) {
-                socket.write("No such command. Try 'help'.\n");
-            } else {
-                try {
-                    afunc(socket, words.slice(1));
-                }
-                catch (err) {
-                    console.log("{{admin error '" + line + "':", err, "}}");
-                    socket.write("COMMAND ERROR\n");
+    let adminServer = net.createServer((socket: net.Socket) => {
+        console.log("{{admin connection opened}}");
+
+        let rl = readline.createInterface({
+            input: socket
+        });
+
+        rl.on("line", (line: string) => {
+            let words = line.split(" ");
+
+            if (words.length > 0) {
+                let afunc = adminFuncs[words[0]];
+
+                if (!afunc) {
+                    socket.write("No such command. Try 'help'.\n");
+                } else {
+                    try {
+                        afunc(socket, words.slice(1));
+                    }
+                    catch (err) {
+                        console.log("{{admin error '" + line + "':", err, "}}");
+                        socket.write("COMMAND ERROR\n");
+                    }
                 }
             }
-        }
+
+            socket.write("admin> ");
+        });
+
+        socket.on("close", () => {
+            console.log("{{admin closed}}");
+        });
 
         socket.write("admin> ");
     });
 
-    socket.on("close", () => {
-        console.log("{{admin closed}}");
-    });
-
-    socket.write("admin> ");
-});
-
-adminServer.listen(ADMIN_SOCK_PATH);
+    adminServer.listen(ADMIN_SOCK_PATH);
+}
