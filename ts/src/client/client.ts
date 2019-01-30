@@ -43,8 +43,6 @@ export class Client {
     private connectWin: ConnectWin;
 
     constructor() {
-        this.loadLayout();
-
         this.aboutWin = new AboutWin();
         this.jsScript = new JsScript();
 
@@ -64,7 +62,7 @@ export class Client {
         this.mxp = new Mxp(this.outputManager);
         this.socket = new Socket(this.outputManager, this.mxp);
         this.connectWin = new ConnectWin(this.socket);
-        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
+        this.menuBar = new MenuBar(this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
 
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
@@ -88,15 +86,6 @@ export class Client {
                 this.connectWin.show();
             }
         }
-    }
-
-    private loadLayout() {
-        // (<any>$("#mainVertSplit")).jqxSplitter({
-        //     width: "100%",
-        //     height: "100%",
-        //     orientation: "vertical",
-        //     panels: [{size: "75%"}, {size: "25%"}]
-        // });
     }
 
     public readonly UserConfig = UserConfig;

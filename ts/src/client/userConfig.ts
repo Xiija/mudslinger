@@ -25,12 +25,9 @@ export namespace UserConfig {
         return cfgVals[key];
     }
 
-    export function set(key: string, val: any, save: boolean = true) {
+    export function set(key: string, val: any) {
         cfgVals[key] = val;
-
-        if (save === true) {
-            saveConfig();
-        }
+        saveConfig();
     }
 
     function saveConfig() {

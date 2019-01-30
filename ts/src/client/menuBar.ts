@@ -21,11 +21,8 @@ export class MenuBar {
     private $chkEnableUtf8: JQuery;
     private $chkEnableTrig: JQuery;
     private $chkEnableAlias: JQuery;
-    private $chkEnableMap: JQuery;
-    private $chkEnableGauges: JQuery;
 
     constructor(
-        private client: Client,
         private socket: Socket,
         private aliasEditor: AliasEditor,
         private triggerEditor: TriggerEditor,
@@ -61,11 +58,9 @@ export class MenuBar {
 
         this.$chkEnableMxp.change(function() {
             UserConfig.set("mxpEnabled", this.checked);
-            GlEvent.setMxpEnabled.fire(this.checked);
         });
 
-        let enableMxp = UserConfig.getDef("mxpEnabled", true);
-        (this.$chkEnableMxp[0] as HTMLInputElement).checked = enableMxp;
+        (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);;
 
         this.$chkEnableTrig.change(function() {
             GlEvent.setTriggersEnabled.fire(this.checked);
