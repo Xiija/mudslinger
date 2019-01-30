@@ -85,6 +85,20 @@ export class Client {
             this.outputWin.handleTelnetError(data);
         });
 
+        // CommandInput events
+        this.commandInput.EvtEmitCmd.handle((data: string) => {
+            this.outputWin.handleSendCommand(data);
+            this.socket.sendCmd(data);
+        });
+
+        // Mxp events
+        this.mxp.EvtEmitCmd.handle((data) => {
+            if (data.noPrint !== true) {
+                this.outputWin.handleSendCommand(data.value);
+            }
+            this.socket.sendCmd(data.value);
+        });
+
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
             return "";

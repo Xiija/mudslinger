@@ -1,8 +1,10 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, GlDef, EventHook } from "./event";
 
 import {AliasManager} from "./aliasManager";
 
 export class CommandInput {
+    public EvtEmitCmd = new EventHook<string>();
+
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
     private cmd_entered: string = "";
@@ -71,10 +73,10 @@ export class CommandInput {
             if (this.chkCmdStack.checked) {
                 let cmds = cmd.split(";");
                 for (let i = 0; i < cmds.length; i++) {
-                    GlEvent.sendCommand.fire({value: cmds[i]});
+                    this.EvtEmitCmd.fire(cmds[i]);
                 }
             } else {
-                GlEvent.sendCommand.fire({value: cmd});
+                this.EvtEmitCmd.fire(cmd);
             }
         } else if (result !== true) {
             let cmds: string[] = [];

@@ -24,7 +24,6 @@ export class Socket {
     private clientIp: string;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
-        GlEvent.sendCommand.handle(this.handleSendCommand, this);
         GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
         GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
@@ -107,7 +106,7 @@ export class Socket {
         this.ioEvt.clReqTelnetClose.fire(null);
     }
 
-    private sendCmd(cmd: string) {
+    sendCmd(cmd: string) {
         cmd += "\r\n";
         let arr: Uint8Array;
         if (UserConfig.get("utf8Enabled") === true) {

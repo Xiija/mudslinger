@@ -1,8 +1,10 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, GlDef, EventHook } from "./event";
 
 import { OutputManager } from "./outputManager";
 
 export class Mxp {
+    public EvtEmitCmd = new EventHook<{value: string, noPrint: boolean}>();
+
     private openTags: Array<string> = [];
     private tagHandlers: Array<(tag: string) => boolean> = [];
 
@@ -17,7 +19,7 @@ export class Mxp {
             let re = /^<version>$/i;
             let match = re.exec(tag);
             if (match) {
-                GlEvent.sendCommand.fire({
+                this.EvtEmitCmd.fire({
                     value: "\x1b[1z<VERSION CLIENT=Mudslinger MXP=0.01>", // using closing line tag makes it print twice...
                     noPrint: true});
                 return true;
@@ -107,7 +109,7 @@ export class Mxp {
                     elem.addClass("underline");
 
                     elem.click(() => {
-                        GlEvent.sendCommand.fire({value: tag_m[1]});
+                        this.EvtEmitCmd.fire({value: tag_m[1], noPrint: false});
                     });
                     this.openTags.push("send");
                     this.outputManager.pushMxpElem(elem);
@@ -142,7 +144,7 @@ export class Mxp {
                         let txt = elem.text();
                         elem[0].setAttribute("title", txt);
                         elem.click(() => {
-                            GlEvent.sendCommand.fire({value: txt});
+                            this.EvtEmitCmd.fire({value: txt, noPrint: false});
                         });
                     }
                 }
