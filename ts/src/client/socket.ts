@@ -17,7 +17,6 @@ export class Socket {
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
     private clientIp: string;
-    private utf8Enabled: boolean;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
         GlEvent.sendCommand.handle(this.handleSendCommand, this);
@@ -25,10 +24,6 @@ export class Socket {
         GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
         GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
-
-        this.utf8Enabled = UserConfig.get("utf8Enabled");
-
-        GlEvent.setUtf8Enabled.handle((val) => { this.utf8Enabled = val; }, this);
     }
 
     public open() {
@@ -111,7 +106,7 @@ export class Socket {
     private sendCmd(cmd: string) {
         cmd += "\r\n";
         let arr: Uint8Array;
-        if (this.utf8Enabled) {
+        if (UserConfig.get("utf8Enabled") === true) {
             arr = utf8encode(cmd);
         } else {
             arr = new Uint8Array(cmd.length);
@@ -119,7 +114,7 @@ export class Socket {
                 arr[i] = cmd.charCodeAt(i);
             }
         }
-        
+
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
 
@@ -153,7 +148,7 @@ export class Socket {
         let rx = this.partialSeq || "";
         this.partialSeq = null;
 
-        if (this.utf8Enabled) {
+        if (UserConfig.get("utf8Enabled") === true) {
             let utf8Data: Uint8Array;
             if (this.partialUtf8) {
                 utf8Data = new Uint8Array(data.byteLength + this.partialUtf8.length);

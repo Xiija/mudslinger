@@ -51,10 +51,9 @@ export class MenuBar {
 
         this.$chkEnableUtf8.change(function() {
             UserConfig.set("utf8Enabled", this.checked);
-            GlEvent.setUtf8Enabled.fire(this.checked);
         });
 
-        (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.get("utf8Enabled");
+        (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.getDef("utf8Enabled", false);
 
         this.$chkEnableMxp.change(function() {
             UserConfig.set("mxpEnabled", this.checked);
