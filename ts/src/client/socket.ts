@@ -1,4 +1,4 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, GlDef, EventHook } from "./event";
 
 import * as io from "socket.io-client";
 import { Mxp } from "./mxp";
@@ -13,6 +13,8 @@ declare let configClient: any;
 
 
 export class Socket {
+    public EvtServerEcho = new EventHook<boolean>();
+
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
@@ -59,8 +61,7 @@ export class Socket {
             });
 
             this.telnetClient.EvtServerEcho.handle((data) => {
-                // Server echo ON means we should have local echo OFF
-                GlEvent.setEcho.fire(!data);
+                this.EvtServerEcho.fire(data);
             });
 
             GlEvent.telnetConnect.fire(null);

@@ -22,7 +22,6 @@ export class CommandInput {
         this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });
         this.$cmdInputPw.keydown((event: KeyboardEvent) => { return this.pwKeydown(event); });
 
-        GlEvent.setEcho.handle(this.handleSetEcho, this);
         GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
 
         $(document).ready(() => {
@@ -32,7 +31,7 @@ export class CommandInput {
     }
 
     private echo: boolean = true;
-    private handleSetEcho(value: GlDef.SetEchoData): void {
+    setEcho(value: boolean): void {
         this.echo = value;
 
         if (this.echo) {
@@ -59,7 +58,7 @@ export class CommandInput {
     }
 
     private handleTelnetConnect(): void {
-        this.handleSetEcho(true);
+        this.setEcho(true);
     }
 
     private sendPw(): void {

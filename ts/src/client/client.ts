@@ -64,6 +64,11 @@ export class Client {
         this.connectWin = new ConnectWin(this.socket);
         this.menuBar = new MenuBar(this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
 
+        this.socket.EvtServerEcho.handle((val: boolean) => {
+            // Server echo ON means we should have local echo OFF
+            this.commandInput.setEcho(!val);
+        });
+
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
             return "";
