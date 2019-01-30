@@ -16,6 +16,7 @@ export class Socket {
     public EvtServerEcho = new EventHook<boolean>();
     public EvtTelnetConnect = new EventHook<void>();
     public EvtTelnetDisconnect = new EventHook<void>();
+    public EvtTelnetError = new EventHook<string>();
 
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
@@ -75,7 +76,7 @@ export class Socket {
         });
 
         this.ioEvt.srvTelnetError.handle((data) => {
-            GlEvent.telnetError.fire(data);
+            this.EvtTelnetError.fire(data);
         });
 
         this.ioEvt.srvTelnetData.handle((data) => {
