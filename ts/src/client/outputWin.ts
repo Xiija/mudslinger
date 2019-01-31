@@ -11,7 +11,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
 
         $(document).ready(() => {
             window.onerror = this.handleWindowError.bind(this);
@@ -168,21 +167,6 @@ export class OutputWin extends OutWinBase {
         this.$target.append(
             "<span style=\"color:red\">"
             + "[[Script eval error<br>"
-            + stack + "<br>"
-            + "]]"
-            + "<br>"
-            + "</span>"
-        );
-        this.scrollBottom(true);
-    }
-
-    private handleScriptExecError(data: GlDef.ScriptExecErrorData) {
-        let err: any = data;
-        let stack = Util.rawToHtml(err.stack);
-
-        this.$target.append(
-            "<span style=\"color:red\">"
-            + "[[Script execution error<br>"
             + stack + "<br>"
             + "]]"
             + "<br>"
