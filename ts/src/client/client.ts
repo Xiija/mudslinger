@@ -101,6 +101,10 @@ export class Client {
             this.outputWin.handleWsError();
         });
 
+        this.socket.EvtWsConnect.handle(() => {
+            this.outputWin.handleWsConnect();
+        });
+
         // CommandInput events
         this.commandInput.EvtEmitCmd.handle((data: string) => {
             this.outputWin.handleSendCommand(data);

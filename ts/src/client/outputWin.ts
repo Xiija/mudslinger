@@ -8,7 +8,6 @@ export class OutputWin extends OutWinBase {
     constructor(private triggerManager: TriggerManager) {
         super($("#winOutput"));
 
-        GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
 
         $(document).ready(() => {
@@ -107,7 +106,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleWsConnect() {
+    handleWsConnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket connected]]"

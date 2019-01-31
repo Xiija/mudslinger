@@ -19,6 +19,7 @@ export class Socket {
     public EvtTelnetError = new EventHook<string>();
     public EvtMxpTag = new EventHook<string>();
     public EvtWsError = new EventHook<any>();
+    public EvtWsConnect = new EventHook<void>();
 
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
@@ -37,7 +38,7 @@ export class Socket {
             "/telnet");
 
         this.ioConn.on("connect", () => {
-            GlEvent.wsConnect.fire(null);
+            this.EvtWsConnect.fire(null);
         });
 
         this.ioConn.on("disconnect", () => {
