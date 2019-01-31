@@ -2,7 +2,6 @@
 
 import { getUrlParameter } from "./util";
 
-import { GlEvent } from "./event";
 import { UserConfig } from "./userConfig";
 import { AppInfo } from "./appInfo";
 
@@ -96,6 +95,10 @@ export class Client {
 
         this.socket.EvtMxpTag.handle((data: string) => {
             this.mxp.handleMxpTag(data);
+        });
+
+        this.socket.EvtWsError.handle((data) => {
+            this.outputWin.handleWsError();
         });
 
         // CommandInput events

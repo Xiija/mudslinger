@@ -8,7 +8,6 @@ export class OutputWin extends OutWinBase {
     constructor(private triggerManager: TriggerManager) {
         super($("#winOutput"));
 
-        GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
 
@@ -137,7 +136,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleWsError() {
+    handleWsError() {
         this.$target.append(
             "<span style=\"color:red\">"
             + "[[Websocket error]]"
