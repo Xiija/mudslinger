@@ -24,7 +24,6 @@ export namespace GlEvent {
     export const wsError = new EventHook<GlDef.WsErrorData>();
     export const wsConnect = new EventHook<GlDef.WsConnectData>();
     export const wsDisconnect = new EventHook<GlDef.WsDisconnectData>();
-    export const mxpTag = new EventHook<GlDef.MxpTagData>();
 }
 
 export namespace GlDef {

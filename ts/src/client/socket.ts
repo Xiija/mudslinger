@@ -17,6 +17,7 @@ export class Socket {
     public EvtTelnetConnect = new EventHook<void>();
     public EvtTelnetDisconnect = new EventHook<void>();
     public EvtTelnetError = new EventHook<string>();
+    public EvtMxpTag = new EventHook<string>();
 
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
@@ -215,7 +216,7 @@ export class Socket {
                 i += match[0].length;
                 this.outputManager.handleText(output);
                 output = "";
-                GlEvent.mxpTag.fire(match[1]);
+                this.EvtMxpTag.fire(match[1]);
                 continue;
             }
 

@@ -10,8 +10,6 @@ export class Mxp {
 
     constructor(private outputManager: OutputManager) {
         this.makeTagHandlers();
-
-        GlEvent.mxpTag.handle(this.handleMxpTag, this);
     }
 
     private makeTagHandlers() {
@@ -155,7 +153,7 @@ export class Mxp {
         });
     }
 
-    private handleMxpTag(data: GlDef.MxpTagData) {
+    handleMxpTag(data: GlDef.MxpTagData) {
         let handled = false;
         for (let i = 0; i < this.tagHandlers.length; i++) {
             /* tag handlers will return true if it"s a match */

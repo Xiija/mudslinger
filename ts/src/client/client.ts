@@ -85,6 +85,10 @@ export class Client {
             this.outputWin.handleTelnetError(data);
         });
 
+        this.socket.EvtMxpTag.handle((data: string) => {
+            this.mxp.handleMxpTag(data);
+        });
+
         // CommandInput events
         this.commandInput.EvtEmitCmd.handle((data: string) => {
             this.outputWin.handleSendCommand(data);
