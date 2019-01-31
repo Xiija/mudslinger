@@ -1,4 +1,4 @@
-import { GlEvent, GlDef, EventHook } from "./event";
+import { EventHook } from "./event";
 
 import {AliasManager} from "./aliasManager";
 

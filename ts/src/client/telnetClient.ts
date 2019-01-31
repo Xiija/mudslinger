@@ -1,5 +1,5 @@
 import { Telnet, NegotiationData, Cmd, CmdName, Opt, OptName } from "./telnetlib";
-import { EventHook, GlEvent } from "./event";
+import { EventHook } from "./event";
 import { UserConfig } from "./userConfig";
 
 

@@ -1,5 +1,3 @@
-import { GlEvent } from "./event";
-
 import * as Util from "./util";
 import { colorIdToHtml } from "./color";
 import { UserConfig } from "./userConfig";

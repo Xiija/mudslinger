@@ -1,4 +1,4 @@
-import { GlEvent, EventHook } from "./event";
+import { EventHook } from "./event";
 
 export let EvtScriptEmitCmd = new EventHook<string>();
 export let EvtScriptEmitPrint = new EventHook<string>();

@@ -1,4 +1,4 @@
-import { GlEvent, GlDef, EventHook } from "./event";
+import { EventHook } from "./event";
 
 import * as io from "socket.io-client";
 import { Mxp } from "./mxp";

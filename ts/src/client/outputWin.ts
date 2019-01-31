@@ -1,5 +1,3 @@
-import { GlEvent, GlDef } from "./event";
-
 import { OutWinBase } from "./outWinBase";
 import { TriggerManager } from "./triggerManager";
 import * as Util from "./util";

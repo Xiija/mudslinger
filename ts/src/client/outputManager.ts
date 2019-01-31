@@ -1,5 +1,3 @@
-import { GlEvent, GlDef } from "./event";
-
 import { UserConfig } from "./userConfig";
 
 import {OutputWin} from "./outputWin";

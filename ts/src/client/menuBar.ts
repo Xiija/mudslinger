@@ -1,4 +1,4 @@
-import { GlEvent, EventHook } from "./event";
+import { EventHook } from "./event";
 
 import { UserConfig } from "./userConfig";
 

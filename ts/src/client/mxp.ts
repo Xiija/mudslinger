@@ -1,4 +1,4 @@
-import { GlEvent, GlDef, EventHook } from "./event";
+import { EventHook } from "./event";
 
 import { OutputManager } from "./outputManager";
 
@@ -153,7 +153,7 @@ export class Mxp {
         });
     }
 
-    handleMxpTag(data: GlDef.MxpTagData) {
+    handleMxpTag(data: string) {
         let handled = false;
         for (let i = 0; i < this.tagHandlers.length; i++) {
             /* tag handlers will return true if it"s a match */
