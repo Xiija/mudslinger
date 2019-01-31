@@ -19,7 +19,6 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
-    export const wsDisconnect = new EventHook<GlDef.WsDisconnectData>();
 }
 
 export namespace GlDef {

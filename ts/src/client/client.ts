@@ -105,6 +105,11 @@ export class Client {
             this.outputWin.handleWsConnect();
         });
 
+        this.socket.EvtWsDisconnect.handle(() => {
+            this.menuBar.handleTelnetDisconnect();
+            this.outputWin.handleWsDisconnect();
+        })
+
         // CommandInput events
         this.commandInput.EvtEmitCmd.handle((data: string) => {
             this.outputWin.handleSendCommand(data);

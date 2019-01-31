@@ -71,10 +71,6 @@ export class MenuBar {
             UserConfig.set("aliasesEnabled", this.checked);
         });
         (this.$chkEnableAlias[0] as HTMLInputElement).checked = UserConfig.getDef("aliasesEnabled", true);
-
-        GlEvent.wsDisconnect.handle(() => {
-            $("#menuBar-conn-disconn").text("Connect");
-        });
     }
 
     private clickFuncs: {[k: string]: () => void} = {};

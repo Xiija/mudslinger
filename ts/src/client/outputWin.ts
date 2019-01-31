@@ -8,8 +8,6 @@ export class OutputWin extends OutWinBase {
     constructor(private triggerManager: TriggerManager) {
         super($("#winOutput"));
 
-        GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-
         $(document).ready(() => {
             window.onerror = this.handleWindowError.bind(this);
         });
@@ -102,7 +100,7 @@ export class OutputWin extends OutWinBase {
             "<span style=\"color:cyan\">"
             + "[[Telnet disconnected]]"
             + "<br>"
-            + "</span>");
+        + "</span>");
         this.scrollBottom(true);
     }
 
@@ -115,7 +113,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     }
 
-    private handleWsDisconnect() {
+    handleWsDisconnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket disconnected]]"
