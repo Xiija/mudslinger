@@ -11,7 +11,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
         GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
 
         $(document).ready(() => {
@@ -163,9 +162,8 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleScriptEvalError(data: GlDef.ScriptEvalErrorData) {
-        let err: any = data;
-        let stack = Util.rawToHtml(err.stack);
+    handleScriptEvalError(data: {stack: any}) {
+        let stack = Util.rawToHtml(data.stack);
 
         this.$target.append(
             "<span style=\"color:red\">"

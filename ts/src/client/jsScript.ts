@@ -2,6 +2,7 @@ import { GlEvent, EventHook } from "./event";
 
 export let EvtScriptEmitCmd = new EventHook<string>();
 export let EvtScriptEmitPrint = new EventHook<string>();
+export let EvtScriptEmitEvalError = new EventHook<{}>();
 
 function makeScript(text: string, argsSig: string) {
     let _scriptFunc_: any;
@@ -19,7 +20,7 @@ function makeScript(text: string, argsSig: string) {
         eval("_scriptFunc_ = function(" + argsSig + ") {\"use strict\";" + text + "}");
     }
     catch (err) {
-        GlEvent.scriptEvalError.fire({value: err});
+        EvtScriptEmitEvalError.fire(err);
         return null;
     }
 
