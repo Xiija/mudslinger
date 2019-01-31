@@ -4,6 +4,7 @@ import {AliasManager} from "./aliasManager";
 
 export class CommandInput {
     public EvtEmitCmd = new EventHook<string>();
+    public EvtEmitAliasCmds = new EventHook<{orig: string, commands: string[]}>();
 
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
@@ -84,7 +85,7 @@ export class CommandInput {
             for (let i = 0; i < lines.length; i++) {
                 cmds = cmds.concat(lines[i].split(";"));
             }
-            GlEvent.aliasSendCommands.fire({orig: cmd, commands: cmds});
+            this.EvtEmitAliasCmds.fire({orig: cmd, commands: cmds});
         } /* else the script ran already */
 
         this.$cmdInput.select();

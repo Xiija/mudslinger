@@ -91,6 +91,13 @@ export class Client {
             this.socket.sendCmd(data);
         });
 
+        this.commandInput.EvtEmitAliasCmds.handle((data) => {
+            this.outputWin.handleAliasSendCommands(data.orig, data.commands)
+            for (let cmd of data.commands) {
+                this.socket.sendCmd(cmd);
+            }
+        });
+
         // Mxp events
         this.mxp.EvtEmitCmd.handle((data) => {
             if (data.noPrint !== true) {

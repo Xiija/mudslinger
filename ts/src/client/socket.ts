@@ -27,7 +27,6 @@ export class Socket {
         GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
         GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
-        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
     }
 
     public open() {
@@ -134,13 +133,6 @@ export class Socket {
             this.sendCmd(data[i]);
         }
     };
-
-    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
-        for (let i = 0; i < data.commands.length; i++) {
-            this.sendCmd(data.commands[i]);
-        }
-    };
-
 
     private partialUtf8: Uint8Array;
     private partialSeq: string;

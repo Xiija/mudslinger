@@ -14,7 +14,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.scriptSendCommand.handle(this.handleScriptSendCommand, this);
         GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
-        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
         GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
         GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
         GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
@@ -83,17 +82,17 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     }
 
-    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
+    handleAliasSendCommands(orig: string, cmds: string[]) {
         let html = "<span style=\"color:yellow\">";
-        html += Util.rawToHtml(data.orig);
+        html += Util.rawToHtml(orig);
         html += "</span><span style=\"color:cyan\"> --> ";
 
-        for (let i = 0; i < data.commands.length; i++) {
+        for (let i = 0; i < cmds.length; i++) {
             if (i >= 5) {
                 html += "...<br>";
                 break;
             } else {
-                html += Util.rawToHtml(data.commands[i]) + "<br>";
+                html += Util.rawToHtml(cmds[i]) + "<br>";
             }
         }
 
