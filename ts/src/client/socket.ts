@@ -24,7 +24,6 @@ export class Socket {
     private clientIp: string;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
-        GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
     }
 
@@ -117,10 +116,6 @@ export class Socket {
         }
 
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
-    }
-
-    private handleSendCommand(data: GlDef.SendCommandData) {
-        this.sendCmd(data.value);
     }
 
     private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {

@@ -9,7 +9,7 @@ import { AppInfo } from "./appInfo";
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
 import { CommandInput } from "./commandInput";
-import { JsScript } from "./jsScript";
+import { JsScript, EvtScriptEmitCmd } from "./jsScript";
 import { JsScriptWin } from "./jsScriptWin";
 import { MenuBar } from "./menuBar";
 
@@ -109,6 +109,12 @@ export class Client {
                 this.outputWin.handleSendCommand(data.value);
             }
             this.socket.sendCmd(data.value);
+        });
+
+        // JsScript events
+        EvtScriptEmitCmd.handle((data: string) => {
+            this.outputWin.handleScriptSendCommand(data);
+            this.socket.sendCmd(data);
         });
 
         // Prevent navigating away accidentally

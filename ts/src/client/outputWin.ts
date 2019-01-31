@@ -11,7 +11,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.scriptSendCommand.handle(this.handleScriptSendCommand, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
         GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
         GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
@@ -53,11 +52,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleScriptSendCommand(data: GlDef.ScriptSendCommandData) {
-        if (data.noPrint) {
-            return;
-        }
-        let cmd = data.value;
+    handleScriptSendCommand(cmd: string) {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + Util.rawToHtml(cmd)

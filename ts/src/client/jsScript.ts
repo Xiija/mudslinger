@@ -1,10 +1,12 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, GlDef, EventHook } from "./event";
+
+export let EvtScriptEmitCmd = new EventHook<string>();
 
 function makeScript(text: string, argsSig: string) {
     let _scriptFunc_: any;
     /* Scripting API section */
     let send = function(cmd: string) {
-        GlEvent.scriptSendCommand.fire({value: cmd});
+        EvtScriptEmitCmd.fire(cmd);
     };
 
     let print = function(message: string) {
