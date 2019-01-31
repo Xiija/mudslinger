@@ -11,7 +11,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
         GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
         GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
 
@@ -20,7 +19,7 @@ export class OutputWin extends OutWinBase {
         });
     }
 
-    private handleScriptPrint(data: GlDef.ScriptPrintData) {
+    handleScriptPrint(data: string) {
         let message = data;
         let output = JSON.stringify(message);
         this.$target.append(

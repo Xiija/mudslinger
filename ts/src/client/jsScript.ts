@@ -1,6 +1,7 @@
-import { GlEvent, GlDef, EventHook } from "./event";
+import { GlEvent, EventHook } from "./event";
 
 export let EvtScriptEmitCmd = new EventHook<string>();
+export let EvtScriptEmitPrint = new EventHook<string>();
 
 function makeScript(text: string, argsSig: string) {
     let _scriptFunc_: any;
@@ -10,7 +11,7 @@ function makeScript(text: string, argsSig: string) {
     };
 
     let print = function(message: string) {
-       GlEvent.scriptPrint.fire(message);
+       EvtScriptEmitPrint.fire(message);
     };
     /* end Scripting API section */
 

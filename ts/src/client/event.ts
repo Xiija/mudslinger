@@ -19,7 +19,6 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
-    export const scriptPrint = new EventHook<GlDef.ScriptPrintData>();
     export const scriptEvalError = new EventHook<GlDef.ScriptEvalErrorData>();
     export const scriptExecError = new EventHook<GlDef.ScriptExecErrorData>();
     export const changeDefaultColor = new EventHook<GlDef.ChangeDefaultColorData>();

@@ -9,7 +9,7 @@ import { AppInfo } from "./appInfo";
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
 import { CommandInput } from "./commandInput";
-import { JsScript, EvtScriptEmitCmd } from "./jsScript";
+import { JsScript, EvtScriptEmitCmd, EvtScriptEmitPrint } from "./jsScript";
 import { JsScriptWin } from "./jsScriptWin";
 import { MenuBar } from "./menuBar";
 
@@ -115,6 +115,10 @@ export class Client {
         EvtScriptEmitCmd.handle((data: string) => {
             this.outputWin.handleScriptSendCommand(data);
             this.socket.sendCmd(data);
+        });
+
+        EvtScriptEmitPrint.handle((data: string) => {
+            this.outputWin.handleScriptPrint(data);
         });
 
         // TriggerManager events
