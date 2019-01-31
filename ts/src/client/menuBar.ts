@@ -1,10 +1,9 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, EventHook } from "./event";
 
 import { UserConfig } from "./userConfig";
 
 import { getUrlParameter } from "./util";
 
-import { Client } from "./client";
 import { Socket } from "./socket";
 import { AliasEditor } from "./aliasEditor";
 import { TriggerEditor } from "./triggerEditor";
@@ -15,6 +14,8 @@ import { ConnectWin } from "./connectWin";
 declare let configClient: any;
 
 export class MenuBar {
+    public EvtChangeDefaultColor = new EventHook<[string, string]>();
+
     private $menuBar: JQuery;
     private $chkEnableColor: JQuery;
     private $chkEnableMxp: JQuery;
@@ -108,22 +109,22 @@ export class MenuBar {
         };
 
         this.clickFuncs["Green on Black"] = () => {
-            GlEvent.changeDefaultColor.fire(["green", "low"]);
+            this.EvtChangeDefaultColor.fire(["green", "low"]);
             GlEvent.changeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["White on Black"] = () => {
-            GlEvent.changeDefaultColor.fire(["white", "low"]);
+            this.EvtChangeDefaultColor.fire(["white", "low"]);
             GlEvent.changeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["Black on Grey"] = () => {
-            GlEvent.changeDefaultColor.fire(["black", "low"]);
+            this.EvtChangeDefaultColor.fire(["black", "low"]);
             GlEvent.changeDefaultBgColor.fire(["white", "low"]);
         };
 
         this.clickFuncs["Black on White"] = () => {
-            GlEvent.changeDefaultColor.fire(["black", "low"]);
+            this.EvtChangeDefaultColor.fire(["black", "low"]);
             GlEvent.changeDefaultBgColor.fire(["white", "high"]);
         };
 
