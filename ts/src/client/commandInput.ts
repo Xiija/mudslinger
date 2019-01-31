@@ -5,6 +5,7 @@ import {AliasManager} from "./aliasManager";
 export class CommandInput {
     public EvtEmitCmd = new EventHook<string>();
     public EvtEmitAliasCmds = new EventHook<{orig: string, commands: string[]}>();
+    public EvtEmitPw = new EventHook<string>();
 
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
@@ -64,7 +65,7 @@ export class CommandInput {
 
     private sendPw(): void {
         let pw = this.$cmdInputPw.val();
-        GlEvent.sendPw.fire(pw);
+        this.EvtEmitPw.fire(pw);
     }
 
     private sendCmd(): void {

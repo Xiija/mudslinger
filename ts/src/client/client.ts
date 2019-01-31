@@ -98,6 +98,11 @@ export class Client {
             }
         });
 
+        this.commandInput.EvtEmitPw.handle((data: string) => {
+            this.outputWin.echoStars(data.length);
+            this.socket.sendCmd(data);
+        });
+
         // Mxp events
         this.mxp.EvtEmitCmd.handle((data) => {
             if (data.noPrint !== true) {

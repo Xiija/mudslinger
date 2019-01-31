@@ -19,7 +19,6 @@ export class EventHook<TData> {
 }
 
 export namespace GlEvent {
-    export const sendPw = new EventHook<GlDef.SendPwData>();
     export const scriptSendCommand = new EventHook<GlDef.ScriptSendCommandData>();
     export const triggerSendCommands = new EventHook<GlDef.TriggerSendCommandsData>();
     export const scriptSend = new EventHook<GlDef.ScriptSendData>();

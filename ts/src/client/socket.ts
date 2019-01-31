@@ -25,7 +25,6 @@ export class Socket {
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
         GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
-        GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
     }
 
@@ -122,10 +121,6 @@ export class Socket {
 
     private handleSendCommand(data: GlDef.SendCommandData) {
         this.sendCmd(data.value);
-    }
-
-    private handleSendPw(data: GlDef.SendPwData) {
-        this.sendCmd(data);
     }
 
     private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {

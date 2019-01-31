@@ -12,7 +12,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
         GlEvent.scriptSendCommand.handle(this.handleScriptSendCommand, this);
-        GlEvent.sendPw.handle(this.handleSendPw, this);
         GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
         GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
         GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
@@ -34,8 +33,8 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleSendPw(data: GlDef.SendPwData) {
-        let stars = Array(data.length + 1).join("*");
+    echoStars(count: number) {
+        let stars = Array(count + 1).join("*");
 
         this.$target.append(
             "<span style=\"color:yellow\">"
