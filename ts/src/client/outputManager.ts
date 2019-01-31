@@ -33,7 +33,6 @@ export class OutputManager {
 
         this.loadConfig();
 
-        GlEvent.changeDefaultBgColor.handle(this.handleChangeDefaultBgColor, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -282,8 +281,8 @@ export class OutputManager {
         this.saveColorCfg();
     }
 
-    private handleChangeDefaultBgColor(data: GlDef.ChangeDefaultBgColorData) {
-        this.setDefaultAnsiBg(<ansiName>data[0], <ansiLevel>data[1]);
+    handleChangeDefaultBgColor(name: string, level: string) {
+        this.setDefaultAnsiBg(<ansiName>name, <ansiLevel>level);
         this.saveColorCfg();
     }
 

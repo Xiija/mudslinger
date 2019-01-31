@@ -15,6 +15,7 @@ declare let configClient: any;
 
 export class MenuBar {
     public EvtChangeDefaultColor = new EventHook<[string, string]>();
+    public EvtChangeDefaultBgColor = new EventHook<[string, string]>();
 
     private $menuBar: JQuery;
     private $chkEnableColor: JQuery;
@@ -110,22 +111,22 @@ export class MenuBar {
 
         this.clickFuncs["Green on Black"] = () => {
             this.EvtChangeDefaultColor.fire(["green", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["White on Black"] = () => {
             this.EvtChangeDefaultColor.fire(["white", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["Black on Grey"] = () => {
             this.EvtChangeDefaultColor.fire(["black", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["white", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["white", "low"]);
         };
 
         this.clickFuncs["Black on White"] = () => {
             this.EvtChangeDefaultColor.fire(["black", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["white", "high"]);
+            this.EvtChangeDefaultBgColor.fire(["white", "high"]);
         };
 
         this.clickFuncs["Script"] = () => {

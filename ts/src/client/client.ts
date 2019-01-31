@@ -69,6 +69,10 @@ export class Client {
             this.outputManager.handleChangeDefaultColor(data[0], data[1]);
         });
 
+        this.menuBar.EvtChangeDefaultBgColor.handle((data: [string, string]) => {
+            this.outputManager.handleChangeDefaultBgColor(data[0], data[1]);
+        });
+
         // Socket events
         this.socket.EvtServerEcho.handle((val: boolean) => {
             // Server echo ON means we should have local echo OFF
