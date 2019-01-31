@@ -25,7 +25,6 @@ export namespace GlEvent {
     export const wsConnect = new EventHook<GlDef.WsConnectData>();
     export const wsDisconnect = new EventHook<GlDef.WsDisconnectData>();
     export const mxpTag = new EventHook<GlDef.MxpTagData>();
-    export const setClientIp = new EventHook<string>();
 }
 
 export namespace GlDef {
