@@ -7,6 +7,7 @@ import { TrigAlItem } from "./trigAlEditBase";
 
 
 export class TriggerManager {
+    public EvtEmitTriggerCmds = new EventHook<string[]>();
     public evtTriggersChanged = new EventHook<void>();
 
     public triggers: Array<TrigAlItem> = null;
@@ -60,7 +61,7 @@ export class TriggerManager {
                     });
 
                     let cmds = value.replace("\r", "").split("\n");
-                    GlEvent.triggerSendCommands.fire(cmds);
+                    this.EvtEmitTriggerCmds.fire(cmds);
                 }
             } else {
                 if (line.includes(trig.pattern)) {
@@ -69,7 +70,7 @@ export class TriggerManager {
                         if (script) { script(line); };
                     } else {
                         let cmds = trig.value.replace("\r", "").split("\n");
-                        GlEvent.triggerSendCommands.fire(cmds);
+                        this.EvtEmitTriggerCmds.fire(cmds);
                     }
                 }
             }

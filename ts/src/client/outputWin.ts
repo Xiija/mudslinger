@@ -11,7 +11,6 @@ export class OutputWin extends OutWinBase {
         GlEvent.wsError.handle(this.handleWsError, this);
         GlEvent.wsConnect.handle(this.handleWsConnect, this);
         GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
         GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
         GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
         GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
@@ -61,7 +60,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
+    handleTriggerSendCommands(data: string[]) {
         let html = "<span style=\"color:cyan\">";
 
         for (let i = 0; i < data.length; i++) {

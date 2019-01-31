@@ -117,6 +117,14 @@ export class Client {
             this.socket.sendCmd(data);
         });
 
+        // TriggerManager events
+        this.triggerManager.EvtEmitTriggerCmds.handle((data: string[]) => {
+            this.outputWin.handleTriggerSendCommands(data);
+            for (let cmd of data) {
+                this.socket.sendCmd(cmd);
+            }
+        });
+
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
             return "";

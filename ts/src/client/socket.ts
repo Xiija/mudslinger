@@ -24,7 +24,6 @@ export class Socket {
     private clientIp: string;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
-        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
     }
 
     public open() {
@@ -117,12 +116,6 @@ export class Socket {
 
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
-
-    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
-        for (let i = 0; i < data.length; i++) {
-            this.sendCmd(data[i]);
-        }
-    };
 
     private partialUtf8: Uint8Array;
     private partialSeq: string;
