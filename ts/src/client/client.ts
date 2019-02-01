@@ -2,14 +2,13 @@
 
 import { getUrlParameter } from "./util";
 
-import { GlEvent } from "./event";
 import { UserConfig } from "./userConfig";
 import { AppInfo } from "./appInfo";
 
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
 import { CommandInput } from "./commandInput";
-import { JsScript } from "./jsScript";
+import { JsScript, EvtScriptEmitCmd, EvtScriptEmitPrint, EvtScriptEmitEvalError } from "./jsScript";
 import { JsScriptWin } from "./jsScriptWin";
 import { MenuBar } from "./menuBar";
 
@@ -43,8 +42,6 @@ export class Client {
     private connectWin: ConnectWin;
 
     constructor() {
-        this.loadLayout();
-
         this.aboutWin = new AboutWin();
         this.jsScript = new JsScript();
 
@@ -64,7 +61,102 @@ export class Client {
         this.mxp = new Mxp(this.outputManager);
         this.socket = new Socket(this.outputManager, this.mxp);
         this.connectWin = new ConnectWin(this.socket);
-        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
+        this.menuBar = new MenuBar(this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
+
+        // MenuBar events
+        this.menuBar.EvtChangeDefaultColor.handle((data: [string, string]) => {
+            this.outputManager.handleChangeDefaultColor(data[0], data[1]);
+        });
+
+        this.menuBar.EvtChangeDefaultBgColor.handle((data: [string, string]) => {
+            this.outputManager.handleChangeDefaultBgColor(data[0], data[1]);
+        });
+
+        // Socket events
+        this.socket.EvtServerEcho.handle((val: boolean) => {
+            // Server echo ON means we should have local echo OFF
+            this.commandInput.setEcho(!val);
+        });
+
+        this.socket.EvtTelnetConnect.handle(() => {
+            this.commandInput.handleTelnetConnect();
+            this.menuBar.handleTelnetConnect();
+            this.outputWin.handleTelnetConnect();
+        });
+
+        this.socket.EvtTelnetDisconnect.handle(() => {
+            this.menuBar.handleTelnetDisconnect();
+            this.outputWin.handleTelnetDisconnect();
+        });
+
+        this.socket.EvtTelnetError.handle((data: string) => {
+            this.outputWin.handleTelnetError(data);
+        });
+
+        this.socket.EvtMxpTag.handle((data: string) => {
+            this.mxp.handleMxpTag(data);
+        });
+
+        this.socket.EvtWsError.handle((data) => {
+            this.outputWin.handleWsError();
+        });
+
+        this.socket.EvtWsConnect.handle(() => {
+            this.outputWin.handleWsConnect();
+        });
+
+        this.socket.EvtWsDisconnect.handle(() => {
+            this.menuBar.handleTelnetDisconnect();
+            this.outputWin.handleWsDisconnect();
+        })
+
+        // CommandInput events
+        this.commandInput.EvtEmitCmd.handle((data: string) => {
+            this.outputWin.handleSendCommand(data);
+            this.socket.sendCmd(data);
+        });
+
+        this.commandInput.EvtEmitAliasCmds.handle((data) => {
+            this.outputWin.handleAliasSendCommands(data.orig, data.commands)
+            for (let cmd of data.commands) {
+                this.socket.sendCmd(cmd);
+            }
+        });
+
+        this.commandInput.EvtEmitPw.handle((data: string) => {
+            this.outputWin.echoStars(data.length);
+            this.socket.sendCmd(data);
+        });
+
+        // Mxp events
+        this.mxp.EvtEmitCmd.handle((data) => {
+            if (data.noPrint !== true) {
+                this.outputWin.handleSendCommand(data.value);
+            }
+            this.socket.sendCmd(data.value);
+        });
+
+        // JsScript events
+        EvtScriptEmitCmd.handle((data: string) => {
+            this.outputWin.handleScriptSendCommand(data);
+            this.socket.sendCmd(data);
+        });
+
+        EvtScriptEmitPrint.handle((data: string) => {
+            this.outputWin.handleScriptPrint(data);
+        });
+
+        EvtScriptEmitEvalError.handle((data: {stack: any}) => {
+            this.outputWin.handleScriptEvalError(data)
+        });
+
+        // TriggerManager events
+        this.triggerManager.EvtEmitTriggerCmds.handle((data: string[]) => {
+            this.outputWin.handleTriggerSendCommands(data);
+            for (let cmd of data) {
+                this.socket.sendCmd(cmd);
+            }
+        });
 
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
@@ -88,15 +180,6 @@ export class Client {
                 this.connectWin.show();
             }
         }
-    }
-
-    private loadLayout() {
-        // (<any>$("#mainVertSplit")).jqxSplitter({
-        //     width: "100%",
-        //     height: "100%",
-        //     orientation: "vertical",
-        //     panels: [{size: "75%"}, {size: "25%"}]
-        // });
     }
 
     public readonly UserConfig = UserConfig;

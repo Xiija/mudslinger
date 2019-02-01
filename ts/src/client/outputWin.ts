@@ -1,5 +1,3 @@
-import { GlEvent, GlDef } from "./event";
-
 import { OutWinBase } from "./outWinBase";
 import { TriggerManager } from "./triggerManager";
 import * as Util from "./util";
@@ -8,27 +6,12 @@ export class OutputWin extends OutWinBase {
     constructor(private triggerManager: TriggerManager) {
         super($("#winOutput"));
 
-        GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
-        GlEvent.telnetDisconnect.handle(this.handleTelnetDisconnect, this);
-        GlEvent.telnetError.handle(this.handleTelnetError, this);
-        GlEvent.wsError.handle(this.handleWsError, this);
-        GlEvent.wsConnect.handle(this.handleWsConnect, this);
-        GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
-        GlEvent.sendCommand.handle(this.handleSendCommand, this);
-        GlEvent.scriptSendCommand.handle(this.handleScriptSendCommand, this);
-        GlEvent.sendPw.handle(this.handleSendPw, this);
-        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
-        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
-        GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
-        GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
-        GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
-
         $(document).ready(() => {
             window.onerror = this.handleWindowError.bind(this);
         });
     }
 
-    private handleScriptPrint(data: GlDef.ScriptPrintData) {
+    handleScriptPrint(data: string) {
         let message = data;
         let output = JSON.stringify(message);
         this.$target.append(
@@ -39,8 +22,8 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleSendPw(data: GlDef.SendPwData) {
-        let stars = Array(data.length + 1).join("*");
+    echoStars(count: number) {
+        let stars = Array(count + 1).join("*");
 
         this.$target.append(
             "<span style=\"color:yellow\">"
@@ -50,11 +33,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleSendCommand(data: GlDef.SendCommandData) {
-        if (data.noPrint) {
-            return;
-        }
-        let cmd = data.value;
+    handleSendCommand(cmd: string) {
         this.$target.append(
             "<span style=\"color:yellow\">"
             + Util.rawToHtml(cmd)
@@ -63,11 +42,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleScriptSendCommand(data: GlDef.ScriptSendCommandData) {
-        if (data.noPrint) {
-            return;
-        }
-        let cmd = data.value;
+    handleScriptSendCommand(cmd: string) {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + Util.rawToHtml(cmd)
@@ -76,7 +51,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
+    handleTriggerSendCommands(data: string[]) {
         let html = "<span style=\"color:cyan\">";
 
         for (let i = 0; i < data.length; i++) {
@@ -91,17 +66,17 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     }
 
-    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
+    handleAliasSendCommands(orig: string, cmds: string[]) {
         let html = "<span style=\"color:yellow\">";
-        html += Util.rawToHtml(data.orig);
+        html += Util.rawToHtml(orig);
         html += "</span><span style=\"color:cyan\"> --> ";
 
-        for (let i = 0; i < data.commands.length; i++) {
+        for (let i = 0; i < cmds.length; i++) {
             if (i >= 5) {
                 html += "...<br>";
                 break;
             } else {
-                html += Util.rawToHtml(data.commands[i]) + "<br>";
+                html += Util.rawToHtml(cmds[i]) + "<br>";
             }
         }
 
@@ -109,7 +84,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleTelnetConnect(): void {
+    handleTelnetConnect(): void {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Telnet connected]]"
@@ -118,16 +93,16 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleTelnetDisconnect() {
+    handleTelnetDisconnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Telnet disconnected]]"
             + "<br>"
-            + "</span>");
+        + "</span>");
         this.scrollBottom(true);
     }
 
-    private handleWsConnect() {
+    handleWsConnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket connected]]"
@@ -136,7 +111,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     }
 
-    private handleWsDisconnect() {
+    handleWsDisconnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket disconnected]]"
@@ -145,7 +120,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     }
 
-    private handleTelnetError(data: GlDef.TelnetErrorData) {
+    handleTelnetError(data: string) {
         this.$target.append(
             "<span style=\"color:red\">"
             + "[[Telnet error" + "<br>"
@@ -156,7 +131,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleWsError() {
+    handleWsError() {
         this.$target.append(
             "<span style=\"color:red\">"
             + "[[Websocket error]]"
@@ -180,28 +155,12 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     }
 
-    private handleScriptEvalError(data: GlDef.ScriptEvalErrorData) {
-        let err: any = data;
-        let stack = Util.rawToHtml(err.stack);
+    handleScriptEvalError(data: {stack: any}) {
+        let stack = Util.rawToHtml(data.stack);
 
         this.$target.append(
             "<span style=\"color:red\">"
             + "[[Script eval error<br>"
-            + stack + "<br>"
-            + "]]"
-            + "<br>"
-            + "</span>"
-        );
-        this.scrollBottom(true);
-    }
-
-    private handleScriptExecError(data: GlDef.ScriptExecErrorData) {
-        let err: any = data;
-        let stack = Util.rawToHtml(err.stack);
-
-        this.$target.append(
-            "<span style=\"color:red\">"
-            + "[[Script execution error<br>"
             + stack + "<br>"
             + "]]"
             + "<br>"

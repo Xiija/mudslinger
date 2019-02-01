@@ -1,14 +1,18 @@
-import { GlEvent, GlDef } from "./event";
+import { EventHook } from "./event";
+
+export let EvtScriptEmitCmd = new EventHook<string>();
+export let EvtScriptEmitPrint = new EventHook<string>();
+export let EvtScriptEmitEvalError = new EventHook<{}>();
 
 function makeScript(text: string, argsSig: string) {
     let _scriptFunc_: any;
     /* Scripting API section */
     let send = function(cmd: string) {
-        GlEvent.scriptSendCommand.fire({value: cmd});
+        EvtScriptEmitCmd.fire(cmd);
     };
 
     let print = function(message: string) {
-       GlEvent.scriptPrint.fire(message);
+       EvtScriptEmitPrint.fire(message);
     };
     /* end Scripting API section */
 
@@ -16,7 +20,7 @@ function makeScript(text: string, argsSig: string) {
         eval("_scriptFunc_ = function(" + argsSig + ") {\"use strict\";" + text + "}");
     }
     catch (err) {
-        GlEvent.scriptEvalError.fire({value: err});
+        EvtScriptEmitEvalError.fire(err);
         return null;
     }
 

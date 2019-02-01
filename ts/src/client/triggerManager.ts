@@ -1,4 +1,4 @@
-import { GlEvent, GlDef, EventHook } from "./event";
+import { EventHook } from "./event";
 
 import { UserConfig } from "./userConfig";
 
@@ -7,9 +7,9 @@ import { TrigAlItem } from "./trigAlEditBase";
 
 
 export class TriggerManager {
+    public EvtEmitTriggerCmds = new EventHook<string[]>();
     public evtTriggersChanged = new EventHook<void>();
 
-    private enabled: boolean = true;
     public triggers: Array<TrigAlItem> = null;
 
     constructor(private jsScript: JsScript) {
@@ -22,7 +22,6 @@ export class TriggerManager {
 
         this.loadTriggers();
 
-        GlEvent.setTriggersEnabled.handle(this.handleSetTriggersEnabled, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -40,12 +39,8 @@ export class TriggerManager {
         this.evtTriggersChanged.fire(null);
     }
 
-    private handleSetTriggersEnabled(data: GlDef.SetTriggersEnabledData) {
-        this.enabled = data;
-    }
-
     public handleLine(line: string) {
-        if (!this.enabled) return;
+        if (UserConfig.getDef("triggersEnabled", true) !== true) return;
 //        console.log("TRIGGER: " + line);
         for (let i = 0; i < this.triggers.length; i++) {
             let trig = this.triggers[i];
@@ -66,7 +61,7 @@ export class TriggerManager {
                     });
 
                     let cmds = value.replace("\r", "").split("\n");
-                    GlEvent.triggerSendCommands.fire(cmds);
+                    this.EvtEmitTriggerCmds.fire(cmds);
                 }
             } else {
                 if (line.includes(trig.pattern)) {
@@ -75,7 +70,7 @@ export class TriggerManager {
                         if (script) { script(line); };
                     } else {
                         let cmds = trig.value.replace("\r", "").split("\n");
-                        GlEvent.triggerSendCommands.fire(cmds);
+                        this.EvtEmitTriggerCmds.fire(cmds);
                     }
                 }
             }

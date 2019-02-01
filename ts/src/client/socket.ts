@@ -1,4 +1,4 @@
-import { GlEvent, GlDef } from "./event";
+import { EventHook } from "./event";
 
 import * as io from "socket.io-client";
 import { Mxp } from "./mxp";
@@ -13,22 +13,21 @@ declare let configClient: any;
 
 
 export class Socket {
+    public EvtServerEcho = new EventHook<boolean>();
+    public EvtTelnetConnect = new EventHook<void>();
+    public EvtTelnetDisconnect = new EventHook<void>();
+    public EvtTelnetError = new EventHook<string>();
+    public EvtMxpTag = new EventHook<string>();
+    public EvtWsError = new EventHook<any>();
+    public EvtWsConnect = new EventHook<void>();
+    public EvtWsDisconnect = new EventHook<void>();
+
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
     private clientIp: string;
-    private utf8Enabled: boolean;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
-        GlEvent.sendCommand.handle(this.handleSendCommand, this);
-        GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
-        GlEvent.sendPw.handle(this.handleSendPw, this);
-        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
-        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
-
-        this.utf8Enabled = UserConfig.get("utf8Enabled");
-
-        GlEvent.setUtf8Enabled.handle((val) => { this.utf8Enabled = val; }, this);
     }
 
     public open() {
@@ -40,15 +39,15 @@ export class Socket {
             "/telnet");
 
         this.ioConn.on("connect", () => {
-            GlEvent.wsConnect.fire(null);
+            this.EvtWsConnect.fire(null);
         });
 
         this.ioConn.on("disconnect", () => {
-            GlEvent.wsDisconnect.fire(null);
+            this.EvtWsDisconnect.fire(null);
         });
 
         this.ioConn.on("error", (msg: any) => {
-            GlEvent.wsError.fire(msg);
+            this.EvtWsError.fire(msg);
         });
 
         this.ioEvt = new IoEvent(this.ioConn);
@@ -64,20 +63,19 @@ export class Socket {
             });
 
             this.telnetClient.EvtServerEcho.handle((data) => {
-                // Server echo ON means we should have local echo OFF
-                GlEvent.setEcho.fire(!data);
+                this.EvtServerEcho.fire(data);
             });
 
-            GlEvent.telnetConnect.fire(null);
+            this.EvtTelnetConnect.fire(null);
         });
 
         this.ioEvt.srvTelnetClosed.handle(() => {
             this.telnetClient = null;
-            GlEvent.telnetDisconnect.fire(null);
+            this.EvtTelnetDisconnect.fire(null);
         });
 
         this.ioEvt.srvTelnetError.handle((data) => {
-            GlEvent.telnetError.fire(data);
+            this.EvtTelnetError.fire(data);
         });
 
         this.ioEvt.srvTelnetData.handle((data) => {
@@ -108,10 +106,10 @@ export class Socket {
         this.ioEvt.clReqTelnetClose.fire(null);
     }
 
-    private sendCmd(cmd: string) {
+    sendCmd(cmd: string) {
         cmd += "\r\n";
         let arr: Uint8Array;
-        if (this.utf8Enabled) {
+        if (UserConfig.get("utf8Enabled") === true) {
             arr = utf8encode(cmd);
         } else {
             arr = new Uint8Array(cmd.length);
@@ -119,30 +117,9 @@ export class Socket {
                 arr[i] = cmd.charCodeAt(i);
             }
         }
-        
+
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
-
-    private handleSendCommand(data: GlDef.SendCommandData) {
-        this.sendCmd(data.value);
-    }
-
-    private handleSendPw(data: GlDef.SendPwData) {
-        this.sendCmd(data);
-    }
-
-    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
-        for (let i = 0; i < data.length; i++) {
-            this.sendCmd(data[i]);
-        }
-    };
-
-    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
-        for (let i = 0; i < data.commands.length; i++) {
-            this.sendCmd(data.commands[i]);
-        }
-    };
-
 
     private partialUtf8: Uint8Array;
     private partialSeq: string;
@@ -153,7 +130,7 @@ export class Socket {
         let rx = this.partialSeq || "";
         this.partialSeq = null;
 
-        if (this.utf8Enabled) {
+        if (UserConfig.get("utf8Enabled") === true) {
             let utf8Data: Uint8Array;
             if (this.partialUtf8) {
                 utf8Data = new Uint8Array(data.byteLength + this.partialUtf8.length);
@@ -242,7 +219,7 @@ export class Socket {
                 i += match[0].length;
                 this.outputManager.handleText(output);
                 output = "";
-                GlEvent.mxpTag.fire(match[1]);
+                this.EvtMxpTag.fire(match[1]);
                 continue;
             }
 

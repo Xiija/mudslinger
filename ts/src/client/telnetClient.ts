@@ -1,5 +1,5 @@
 import { Telnet, NegotiationData, Cmd, CmdName, Opt, OptName } from "./telnetlib";
-import { EventHook, GlEvent } from "./event";
+import { EventHook } from "./event";
 import { UserConfig } from "./userConfig";
 
 
@@ -15,14 +15,12 @@ export class TelnetClient extends Telnet {
 
     public clientIp: string;
 
-    private mxpEnabled = UserConfig.getDef("mxpEnabled", true);
     private ttypeIndex: number = 0;
 
     constructor(writeFunc: (data: ArrayBuffer) => void) {
         super(writeFunc);
 
         this.EvtNegotiation.handle((data) => { this.onNegotiation(data); });
-        GlEvent.setMxpEnabled.handle((val: boolean) => { this.mxpEnabled = val; });
     }
 
     private onNegotiation(data: NegotiationData) {
@@ -46,7 +44,7 @@ export class TelnetClient extends Telnet {
         } else if (cmd === Cmd.DO) {
             if (opt === Opt.TTYPE) {
                 this.writeArr([Cmd.IAC, Cmd.WILL, Opt.TTYPE]);
-            } else if (opt === ExtOpt.MXP && this.mxpEnabled === true) {
+            } else if (opt === ExtOpt.MXP && UserConfig.getDef("mxpEnabled", true) === true) {
                 this.writeArr([Cmd.IAC, Cmd.WILL, ExtOpt.MXP]);
             } else {
                 this.writeArr([Cmd.IAC, Cmd.WONT, opt]);

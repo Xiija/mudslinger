@@ -1,10 +1,9 @@
-import { GlEvent, GlDef } from "./event";
+import { EventHook } from "./event";
 
 import { UserConfig } from "./userConfig";
 
 import { getUrlParameter } from "./util";
 
-import { Client } from "./client";
 import { Socket } from "./socket";
 import { AliasEditor } from "./aliasEditor";
 import { TriggerEditor } from "./triggerEditor";
@@ -15,17 +14,17 @@ import { ConnectWin } from "./connectWin";
 declare let configClient: any;
 
 export class MenuBar {
+    public EvtChangeDefaultColor = new EventHook<[string, string]>();
+    public EvtChangeDefaultBgColor = new EventHook<[string, string]>();
+
     private $menuBar: JQuery;
     private $chkEnableColor: JQuery;
     private $chkEnableMxp: JQuery;
     private $chkEnableUtf8: JQuery;
     private $chkEnableTrig: JQuery;
     private $chkEnableAlias: JQuery;
-    private $chkEnableMap: JQuery;
-    private $chkEnableGauges: JQuery;
 
     constructor(
-        private client: Client,
         private socket: Socket,
         private aliasEditor: AliasEditor,
         private triggerEditor: TriggerEditor,
@@ -49,43 +48,29 @@ export class MenuBar {
         this.$menuBar.on("itemclick", (event: any) => { this.handleClick(event); });
 
         this.$chkEnableColor.change(function() {
-            GlEvent.setColorsEnabled.fire(this.checked);
+            UserConfig.set("colorsEnabled", this.checked);
         });
+        (this.$chkEnableColor[0] as HTMLInputElement).checked = UserConfig.getDef("colorsEnabled", true);
 
         this.$chkEnableUtf8.change(function() {
             UserConfig.set("utf8Enabled", this.checked);
-            GlEvent.setUtf8Enabled.fire(this.checked);
         });
-
-        (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.get("utf8Enabled");
+        (this.$chkEnableUtf8[0] as HTMLInputElement).checked = UserConfig.getDef("utf8Enabled", false);
 
         this.$chkEnableMxp.change(function() {
             UserConfig.set("mxpEnabled", this.checked);
-            GlEvent.setMxpEnabled.fire(this.checked);
         });
-
-        let enableMxp = UserConfig.getDef("mxpEnabled", true);
-        (this.$chkEnableMxp[0] as HTMLInputElement).checked = enableMxp;
+        (this.$chkEnableMxp[0] as HTMLInputElement).checked = UserConfig.getDef("mxpEnabled", true);
 
         this.$chkEnableTrig.change(function() {
-            GlEvent.setTriggersEnabled.fire(this.checked);
+            UserConfig.set("triggersEnabled", this.checked);
         });
+        (this.$chkEnableTrig[0] as HTMLInputElement).checked = UserConfig.getDef("triggersEnabled", true);
 
         this.$chkEnableAlias.change(function() {
-            GlEvent.setAliasesEnabled.fire(this.checked);
+            UserConfig.set("aliasesEnabled", this.checked);
         });
-
-        GlEvent.telnetConnect.handle(() => {
-            $("#menuBar-conn-disconn").text("Disconnect");
-        });
-
-        GlEvent.telnetDisconnect.handle(() => {
-            $("#menuBar-conn-disconn").text("Connect");
-        });
-
-        GlEvent.wsDisconnect.handle(() => {
-            $("#menuBar-conn-disconn").text("Connect");
-        });
+        (this.$chkEnableAlias[0] as HTMLInputElement).checked = UserConfig.getDef("aliasesEnabled", true);
     }
 
     private clickFuncs: {[k: string]: () => void} = {};
@@ -121,23 +106,23 @@ export class MenuBar {
         };
 
         this.clickFuncs["Green on Black"] = () => {
-            GlEvent.changeDefaultColor.fire(["green", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
+            this.EvtChangeDefaultColor.fire(["green", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["White on Black"] = () => {
-            GlEvent.changeDefaultColor.fire(["white", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
+            this.EvtChangeDefaultColor.fire(["white", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["black", "low"]);
         };
 
         this.clickFuncs["Black on Grey"] = () => {
-            GlEvent.changeDefaultColor.fire(["black", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["white", "low"]);
+            this.EvtChangeDefaultColor.fire(["black", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["white", "low"]);
         };
 
         this.clickFuncs["Black on White"] = () => {
-            GlEvent.changeDefaultColor.fire(["black", "low"]);
-            GlEvent.changeDefaultBgColor.fire(["white", "high"]);
+            this.EvtChangeDefaultColor.fire(["black", "low"]);
+            this.EvtChangeDefaultBgColor.fire(["white", "high"]);
         };
 
         this.clickFuncs["Script"] = () => {
@@ -163,5 +148,13 @@ export class MenuBar {
         if (text in this.clickFuncs) {
             this.clickFuncs[text]();
         }
+    }
+
+    handleTelnetConnect() {
+        $("#menuBar-conn-disconn").text("Disconnect");
+    }
+
+    handleTelnetDisconnect() {
+        $("#menuBar-conn-disconn").text("Connect");
     }
 }

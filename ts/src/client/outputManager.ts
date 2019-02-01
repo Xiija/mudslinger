@@ -1,5 +1,3 @@
-import { GlEvent, GlDef } from "./event";
-
 import { UserConfig } from "./userConfig";
 
 import {OutputWin} from "./outputWin";
@@ -33,8 +31,6 @@ export class OutputManager {
 
         this.loadConfig();
 
-        GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
-        GlEvent.changeDefaultBgColor.handle(this.handleChangeDefaultBgColor, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -278,13 +274,13 @@ export class OutputManager {
         $(".outputText").css("background-color", colorIdToHtml[this.defaultBgId]);
     }
 
-    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
-        this.setDefaultAnsiFg(<ansiName>data[0], <ansiLevel>data[1]);
+    handleChangeDefaultColor(name: string, level: string) {
+        this.setDefaultAnsiFg(<ansiName>name, <ansiLevel>level);
         this.saveColorCfg();
     }
 
-    private handleChangeDefaultBgColor(data: GlDef.ChangeDefaultBgColorData) {
-        this.setDefaultAnsiBg(<ansiName>data[0], <ansiLevel>data[1]);
+    handleChangeDefaultBgColor(name: string, level: string) {
+        this.setDefaultAnsiBg(<ansiName>name, <ansiLevel>level);
         this.saveColorCfg();
     }
 

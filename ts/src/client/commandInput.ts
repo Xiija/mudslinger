@@ -1,8 +1,12 @@
-import { GlEvent, GlDef } from "./event";
+import { EventHook } from "./event";
 
 import {AliasManager} from "./aliasManager";
 
 export class CommandInput {
+    public EvtEmitCmd = new EventHook<string>();
+    public EvtEmitAliasCmds = new EventHook<{orig: string, commands: string[]}>();
+    public EvtEmitPw = new EventHook<string>();
+
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
     private cmd_entered: string = "";
@@ -22,9 +26,6 @@ export class CommandInput {
         this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });
         this.$cmdInputPw.keydown((event: KeyboardEvent) => { return this.pwKeydown(event); });
 
-        GlEvent.setEcho.handle(this.handleSetEcho, this);
-        GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
-
         $(document).ready(() => {
             this.loadHistory();
             this.inputChange(); // Force a resize
@@ -32,7 +33,7 @@ export class CommandInput {
     }
 
     private echo: boolean = true;
-    private handleSetEcho(value: GlDef.SetEchoData): void {
+    setEcho(value: boolean): void {
         this.echo = value;
 
         if (this.echo) {
@@ -58,13 +59,13 @@ export class CommandInput {
         }
     }
 
-    private handleTelnetConnect(): void {
-        this.handleSetEcho(true);
+    handleTelnetConnect(): void {
+        this.setEcho(true);
     }
 
     private sendPw(): void {
         let pw = this.$cmdInputPw.val();
-        GlEvent.sendPw.fire(pw);
+        this.EvtEmitPw.fire(pw);
     }
 
     private sendCmd(): void {
@@ -74,10 +75,10 @@ export class CommandInput {
             if (this.chkCmdStack.checked) {
                 let cmds = cmd.split(";");
                 for (let i = 0; i < cmds.length; i++) {
-                    GlEvent.sendCommand.fire({value: cmds[i]});
+                    this.EvtEmitCmd.fire(cmds[i]);
                 }
             } else {
-                GlEvent.sendCommand.fire({value: cmd});
+                this.EvtEmitCmd.fire(cmd);
             }
         } else if (result !== true) {
             let cmds: string[] = [];
@@ -85,7 +86,7 @@ export class CommandInput {
             for (let i = 0; i < lines.length; i++) {
                 cmds = cmds.concat(lines[i].split(";"));
             }
-            GlEvent.aliasSendCommands.fire({orig: cmd, commands: cmds});
+            this.EvtEmitAliasCmds.fire({orig: cmd, commands: cmds});
         } /* else the script ran already */
 
         this.$cmdInput.select();
