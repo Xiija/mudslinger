@@ -13,7 +13,7 @@ Host and port can also be passed as URL parameters, e.g. [http://mudslinger.roof
 * ANSI color
 * XTERM 256 colors
 * UTF-8
-* MXP support (<image>, <send>, <a>, <i>, <b>, <u>, and <s> tags)
+* MXP support (``<image>``, ``<send>``, ``<a>``, ``<i>``, ``<b>``, ``<u>``, and ``<s>`` tags)
 * Triggers (basic and regex)
 * Aliases (basic and regex)
 * [Scripting support (Javascript)](scripting.md)
